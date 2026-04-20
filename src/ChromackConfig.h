@@ -25,6 +25,7 @@ struct ChromackPanelConfig {
     bool showFooter = true;
     QString title = QStringLiteral("Chromack");
     QString footerText = QStringLiteral("style color picker");
+    QString scrollbar = QStringLiteral("auto");
 };
 
 struct ChromackAnimationConfig {

@@ -282,6 +282,7 @@ chromack_autogen/timestamp: /home/dxle/builds/chromack/CMakeLists.txt \
   /usr/include/qt6/QtCore/QHash \
   /usr/include/qt6/QtCore/QObject \
   /usr/include/qt6/QtCore/QPointer \
+  /usr/include/qt6/QtCore/QRect \
   /usr/include/qt6/QtCore/QString \
   /usr/include/qt6/QtCore/q17memory.h \
   /usr/include/qt6/QtCore/q20bit.h \
@@ -1311,6 +1312,8 @@ chromack_autogen/timestamp: /home/dxle/builds/chromack/CMakeLists.txt \
 
 /usr/lib/cmake/Qt6DBusTools/Qt6DBusToolsConfigVersionImpl.cmake:
 
+/usr/lib/cmake/Qt6DBusTools/Qt6DBusToolsConfigVersion.cmake:
+
 /usr/lib/cmake/Qt6Gui/Qt6QOffscreenIntegrationPluginAdditionalTargetInfo.cmake:
 
 /usr/include/c++/15.2.1/x86_64-pc-linux-gnu/bits/c++locale.h:
@@ -1530,6 +1533,8 @@ chromack_autogen/timestamp: /home/dxle/builds/chromack/CMakeLists.txt \
 /usr/lib/cmake/Qt6Gui/Qt6QWaylandAdwaitaDecorationPluginAdditionalTargetInfo.cmake:
 
 /usr/include/c++/15.2.1/bits/shared_ptr_atomic.h:
+
+/usr/include/qt6/QtCore/QRect:
 
 /usr/include/c++/15.2.1/bits/range_access.h:
 
@@ -2646,5 +2651,3 @@ chromack_autogen/moc_predefs.h:
 /usr/lib/cmake/Qt6DBus/Qt6DBusVersionlessAliasTargets.cmake:
 
 /usr/lib/cmake/Qt6DBusTools/Qt6DBusToolsConfig.cmake:
-
-/usr/lib/cmake/Qt6DBusTools/Qt6DBusToolsConfigVersion.cmake:

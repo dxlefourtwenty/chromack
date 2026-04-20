@@ -364,6 +364,7 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: \
  /usr/include/qt6/QtGui/qguiapplication.h \
  /usr/include/qt6/QtGui/qinputmethod.h /usr/include/qt6/QtCore/qlocale.h \
  /usr/include/qt6/QtGui/qguiapplication_platform.h \
+ /usr/include/qt6/QtGui/QClipboard /usr/include/qt6/QtGui/qclipboard.h \
  /usr/include/qt6/QtGui/QCursor /usr/include/qt6/QtCore/QDir \
  /usr/include/qt6/QtCore/qdir.h /usr/include/qt6/QtCore/qdirlisting.h \
  /usr/include/qt6/QtCore/qfiledevice.h \
@@ -398,11 +399,12 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: \
  /usr/include/qt6/QtCore/qtimezone.h /usr/include/qt6/QtCore/QEasingCurve \
  /usr/include/qt6/QtCore/qeasingcurve.h /usr/include/qt6/QtCore/QFile \
  /usr/include/qt6/QtCore/QFileInfo /usr/include/qt6/QtGui/QGuiApplication \
- /usr/include/qt6/QtWidgets/QHBoxLayout \
- /usr/include/qt6/QtWidgets/qboxlayout.h \
+ /usr/include/qt6/QtWidgets/QGridLayout \
+ /usr/include/qt6/QtWidgets/qgridlayout.h \
  /usr/include/qt6/QtWidgets/qlayout.h \
  /usr/include/qt6/QtWidgets/qlayoutitem.h \
- /usr/include/qt6/QtWidgets/qgridlayout.h \
+ /usr/include/qt6/QtWidgets/qboxlayout.h \
+ /usr/include/qt6/QtWidgets/QHBoxLayout /usr/include/qt6/QtGui/QIcon \
  /usr/include/qt6/QtGui/QKeyEvent /usr/include/qt6/QtGui/qevent.h \
  /usr/include/qt6/QtCore/qurl.h /usr/include/qt6/QtGui/qeventpoint.h \
  /usr/include/qt6/QtGui/qvector2d.h /usr/include/qt6/QtGui/qvectornd.h \
@@ -419,19 +421,26 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: \
  /usr/include/qt6/QtWidgets/qlineedit.h \
  /usr/include/qt6/QtGui/qtextcursor.h \
  /usr/include/qt6/QtGui/qtextformat.h /usr/include/qt6/QtGui/qpen.h \
- /usr/include/qt6/QtGui/qtextoption.h \
+ /usr/include/qt6/QtGui/qtextoption.h /usr/include/qt6/QtGui/QMouseEvent \
+ /usr/include/qt6/QtGui/QPainter /usr/include/qt6/QtGui/qpainter.h \
  /usr/include/qt6/QtCore/QPropertyAnimation \
  /usr/include/qt6/QtCore/qpropertyanimation.h \
  /usr/include/qt6/QtCore/qvariantanimation.h \
  /usr/include/qt6/QtCore/qabstractanimation.h \
+ /usr/include/qt6/QtCore/QProcess /usr/include/qt6/QtCore/qprocess.h \
  /usr/include/qt6/QtWidgets/QPushButton \
  /usr/include/qt6/QtWidgets/qpushbutton.h \
  /usr/include/qt6/QtWidgets/qabstractbutton.h \
+ /usr/include/qt6/QtCore/QRegularExpression \
+ /usr/include/qt6/QtCore/qregularexpression.h \
  /usr/include/qt6/QtGui/QScreen /usr/include/qt6/QtWidgets/QScrollArea \
  /usr/include/qt6/QtWidgets/qscrollarea.h \
  /usr/include/qt6/QtWidgets/qabstractscrollarea.h \
+ /usr/include/qt6/QtWidgets/QSlider /usr/include/qt6/QtWidgets/qslider.h \
+ /usr/include/qt6/QtWidgets/qabstractslider.h \
  /usr/include/qt6/QtCore/QStandardPaths \
  /usr/include/qt6/QtCore/qstandardpaths.h \
+ /usr/include/qt6/QtWidgets/QStyle /usr/include/qt6/QtWidgets/qstyle.h \
  /usr/include/qt6/QtCore/QTextStream /usr/include/qt6/QtCore/QTimer \
  /usr/include/qt6/QtCore/qtimer.h \
  /usr/include/qt6/QtCore/QVariantAnimation \

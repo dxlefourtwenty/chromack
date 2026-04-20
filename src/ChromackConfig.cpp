@@ -88,7 +88,7 @@ QString defaultConfigContents()
         "[layout]\n"
         "anchor = \"top-right\"\n"
         "screen = \"auto\"\n"
-        "width = 420\n"
+        "width = 520\n"
         "top_margin = 24\n"
         "right_margin = 24\n"
         "bottom_margin = 24\n"
@@ -102,6 +102,7 @@ QString defaultConfigContents()
         "close_on_escape = true\n"
         "show_header = true\n"
         "show_footer = true\n"
+        "scrollbar = \"auto\"\n"
         "title = \"Chromack\"\n"
         "footer_text = \"style color picker\"\n"
         "\n"
@@ -140,86 +141,266 @@ QString defaultColorsContents()
 
 QString defaultStyleContents()
 {
-    return QStringLiteral(
-        "@import \"./colors.css\";\n"
-        "\n"
-        ":root {\n"
-        "    --font-family: \"Noto Sans\";\n"
-        "    --panel-radius: 16px;\n"
-        "    --panel-border-width: 1px;\n"
-        "    --panel-padding: 14px;\n"
-        "    --section-gap: 10px;\n"
-        "    --row-height: 34px;\n"
-        "    --row-radius: 8px;\n"
-        "    --preview-size: 18px;\n"
-        "}\n"
-        "\n"
-        "QWidget#chromackWindow {\n"
-        "    background: transparent;\n"
-        "}\n"
-        "\n"
-        "QWidget#chromackWindow,\n"
-        "QWidget#chromackWindow * {\n"
-        "    font-family: var(--font-family);\n"
-        "}\n"
-        "\n"
-        "QFrame#panelRoot {\n"
-        "    background: var(--color-surface);\n"
-        "    border: var(--panel-border-width) solid var(--color-border);\n"
-        "    border-radius: var(--panel-radius);\n"
-        "}\n"
-        "\n"
-        "QFrame#headerBar,\n"
-        "QFrame#footerBar,\n"
-        "QWidget#pickerViewport,\n"
-        "QWidget#pickerContainer {\n"
-        "    background: var(--color-surface-alt);\n"
-        "    border-radius: 10px;\n"
-        "}\n"
-        "\n"
-        "QLabel#headerTitle,\n"
-        "QLabel#footerLabel,\n"
-        "QLabel#colorNameLabel {\n"
-        "    color: var(--color-text);\n"
-        "}\n"
-        "\n"
-        "QLabel#colorValueLabel {\n"
-        "    color: var(--color-muted);\n"
-        "}\n"
-        "\n"
-        "QLineEdit#colorInput {\n"
-        "    color: var(--color-text);\n"
-        "    background: var(--color-surface);\n"
-        "    border: 1px solid var(--color-border);\n"
-        "    border-radius: var(--row-radius);\n"
-        "    padding: 0 8px;\n"
-        "}\n"
-        "\n"
-        "QPushButton#applyButton,\n"
-        "QPushButton#reloadButton,\n"
-        "QPushButton#closeButton {\n"
-        "    background: var(--color-primary);\n"
-        "    color: var(--color-surface);\n"
-        "    border: none;\n"
-        "    border-radius: 8px;\n"
-        "    padding: 0 10px;\n"
-        "    min-height: 28px;\n"
-        "    font-weight: 700;\n"
-        "}\n"
-        "\n"
-        "QPushButton#reloadButton {\n"
-        "    background: var(--color-secondary);\n"
-        "}\n"
-        "\n"
-        "QPushButton#closeButton {\n"
-        "    background: var(--color-danger);\n"
-        "    color: var(--color-text);\n"
-        "}\n"
-        "\n"
-        "QFrame#previewSwatch {\n"
-        "    border: 1px solid var(--color-border);\n"
-        "    border-radius: 6px;\n"
-        "}\n");
+    return QStringLiteral(R"(@import "./colors.css";
+
+:root {
+    --font-family: "Noto Sans";
+    --panel-radius: 16px;
+    --panel-border-width: 1px;
+    --panel-padding: 14px;
+    --section-gap: 10px;
+
+    --header-radius: 12px;
+    --footer-radius: 12px;
+    --content-radius: 12px;
+    --section-title-size: 13px;
+    --title-size: 17px;
+    --subtitle-size: 12px;
+
+    --picker-height: 220px;
+    --picker-radius: 10px;
+    --hue-width: 22px;
+
+    --swatch-size: 24px;
+    --swatch-radius: 6px;
+    --swatch-gap: 6px;
+
+    --recent-swatch-size: 30px;
+    --recent-swatch-radius: 8px;
+
+    --input-height: 34px;
+    --input-radius: 8px;
+
+    --button-height: 34px;
+    --button-radius: 10px;
+    --button-padding-x: 12px;
+
+    --preview-width: 74px;
+    --preview-height: 34px;
+    --preview-radius: 10px;
+
+    --control-border-width: 1px;
+    --control-border-color: var(--color-border);
+
+    --header-bg: var(--color-surface-alt);
+    --footer-bg: var(--color-surface-alt);
+    --content-bg: var(--color-surface-alt);
+    --panel-bg: var(--color-surface);
+
+    --text-main: var(--color-text);
+    --text-muted: var(--color-muted);
+
+    --button-apply-bg: #cbbcff;
+    --button-apply-fg: #111111;
+    --button-cancel-bg: transparent;
+    --button-cancel-fg: var(--text-main);
+    --button-copy-bg: #cbbcff;
+    --button-copy-fg: #111111;
+}
+
+QWidget#chromackWindow {
+    background: transparent;
+}
+
+QWidget#chromackWindow,
+QWidget#chromackWindow * {
+    font-family: var(--font-family);
+}
+
+QFrame#panelRoot {
+    background: var(--panel-bg);
+    border: var(--panel-border-width) solid var(--color-border);
+    border-radius: var(--panel-radius);
+}
+
+QFrame#headerBar {
+    background: var(--header-bg);
+    border-radius: var(--header-radius);
+}
+
+QLabel#headerTitle {
+    color: var(--text-main);
+    font-size: var(--title-size);
+    font-weight: 700;
+}
+
+QLabel#headerSubtitle {
+    color: var(--text-muted);
+    font-size: var(--subtitle-size);
+}
+
+QPushButton#closeButton {
+    min-height: var(--button-height);
+    min-width: var(--button-height);
+    border: var(--control-border-width) solid var(--control-border-color);
+    border-radius: var(--button-radius);
+    background: transparent;
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+QWidget#pickerViewport,
+QWidget#pickerContainer {
+    background: var(--content-bg);
+    border-radius: var(--content-radius);
+}
+
+QFrame#pickerTopFrame {
+    background: transparent;
+}
+
+QWidget#svPicker {
+    min-height: var(--picker-height);
+    border: var(--control-border-width) solid var(--control-border-color);
+    border-radius: var(--picker-radius);
+}
+
+QSlider#hueSlider {
+    min-width: var(--hue-width);
+    max-width: var(--hue-width);
+}
+
+QSlider#hueSlider::groove:vertical {
+    border: var(--control-border-width) solid var(--control-border-color);
+    border-radius: 6px;
+    width: var(--hue-width);
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #ff0000,
+                                stop:0.17 #ffff00,
+                                stop:0.33 #00ff00,
+                                stop:0.50 #00ffff,
+                                stop:0.67 #0000ff,
+                                stop:0.83 #ff00ff,
+                                stop:1 #ff0000);
+}
+
+QSlider#hueSlider::handle:vertical {
+    background: #ffffff;
+    border: 1px solid #111111;
+    height: 12px;
+    margin: -2px -2px;
+    border-radius: 6px;
+}
+
+QLabel#sectionLabel {
+    color: var(--text-main);
+    font-size: var(--section-title-size);
+    font-weight: 700;
+}
+
+QPushButton#materialSwatch {
+    min-width: var(--swatch-size);
+    max-width: var(--swatch-size);
+    min-height: var(--swatch-size);
+    max-height: var(--swatch-size);
+    border: var(--control-border-width) solid var(--control-border-color);
+    border-radius: var(--swatch-radius);
+    padding: 0;
+}
+
+QPushButton#materialSwatch:checked {
+    border: 2px solid var(--text-main);
+}
+
+QPushButton#recentSwatch {
+    min-width: var(--recent-swatch-size);
+    max-width: var(--recent-swatch-size);
+    min-height: var(--recent-swatch-size);
+    max-height: var(--recent-swatch-size);
+    border: var(--control-border-width) solid var(--control-border-color);
+    border-radius: var(--recent-swatch-radius);
+    padding: 0;
+}
+
+QLabel#rowLabel,
+QLabel#footerLabel {
+    color: var(--text-main);
+}
+
+QSlider#opacitySlider::groove:horizontal {
+    height: 10px;
+    border-radius: 5px;
+    border: var(--control-border-width) solid var(--control-border-color);
+    background: #1b1d2a;
+}
+
+QSlider#opacitySlider::sub-page:horizontal {
+    background: #cbbcff;
+    border-radius: 5px;
+}
+
+QSlider#opacitySlider::handle:horizontal {
+    width: 14px;
+    margin: -3px 0;
+    border-radius: 7px;
+    border: 1px solid #111111;
+    background: #ffffff;
+}
+
+QFrame#opacityPreview {
+    min-width: var(--preview-width);
+    min-height: var(--preview-height);
+    border-radius: var(--preview-radius);
+    border: var(--control-border-width) solid var(--control-border-color);
+}
+
+QLineEdit#hexInput,
+QLineEdit#rgbaInput {
+    min-height: var(--input-height);
+    border: var(--control-border-width) solid var(--control-border-color);
+    border-radius: var(--input-radius);
+    padding: 0 10px;
+    color: var(--text-main);
+    background: var(--panel-bg);
+}
+
+QPushButton#inlineCopyButton {
+    min-width: var(--input-height);
+    max-width: var(--input-height);
+    min-height: var(--input-height);
+    max-height: var(--input-height);
+    border-radius: var(--input-radius);
+    border: var(--control-border-width) solid var(--control-border-color);
+    background: var(--panel-bg);
+    color: var(--text-main);
+    padding: 0;
+}
+
+QPushButton#inlineCopyButton:hover {
+    border-color: var(--text-main);
+}
+
+QFrame#footerBar {
+    background: var(--footer-bg);
+    border-radius: var(--footer-radius);
+}
+
+QPushButton#cancelButton,
+QPushButton#applyButton,
+QPushButton#copyButton {
+    min-height: var(--button-height);
+    border-radius: var(--button-radius);
+    padding: 0 var(--button-padding-x);
+    border: var(--control-border-width) solid transparent;
+    font-weight: 700;
+}
+
+QPushButton#cancelButton {
+    background: var(--button-cancel-bg);
+    color: var(--button-cancel-fg);
+    border-color: var(--control-border-color);
+}
+
+QPushButton#applyButton {
+    background: var(--button-apply-bg);
+    color: var(--button-apply-fg);
+}
+
+QPushButton#copyButton {
+    background: var(--button-copy-bg);
+    color: var(--button-copy-fg);
+}
+)");
 }
 
 QString stripInlineComment(const QString &line)
@@ -248,6 +429,10 @@ bool parseString(const QString &raw, QString *out)
     }
 
     if (value.startsWith('"') && value.endsWith('"') && value.size() >= 2) {
+        *out = value.mid(1, value.size() - 2);
+        return true;
+    }
+    if (value.startsWith('\'') && value.endsWith('\'') && value.size() >= 2) {
         *out = value.mid(1, value.size() - 2);
         return true;
     }
@@ -437,6 +622,8 @@ void loadConfig(const QString &path, ChromackConfig *config)
                 parseBool(value, &config->panel.showHeader);
             } else if (key == QStringLiteral("show_footer")) {
                 parseBool(value, &config->panel.showFooter);
+            } else if (key == QStringLiteral("scrollbar")) {
+                parseString(value, &config->panel.scrollbar);
             } else if (key == QStringLiteral("title")) {
                 parseString(value, &config->panel.title);
             } else if (key == QStringLiteral("footer_text")) {
@@ -484,6 +671,15 @@ void loadConfig(const QString &path, ChromackConfig *config)
     if (direction != QStringLiteral("right") && direction != QStringLiteral("left") &&
         direction != QStringLiteral("auto")) {
         config->animation.slideDirection = QStringLiteral("right");
+    }
+
+    const QString scrollbar = config->panel.scrollbar.trimmed().toLower();
+    if (scrollbar != QStringLiteral("auto") &&
+        scrollbar != QStringLiteral("none") &&
+        scrollbar != QStringLiteral("always")) {
+        config->panel.scrollbar = QStringLiteral("auto");
+    } else {
+        config->panel.scrollbar = scrollbar;
     }
 }
 

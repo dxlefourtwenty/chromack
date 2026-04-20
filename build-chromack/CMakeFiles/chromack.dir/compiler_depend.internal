@@ -1178,6 +1178,7 @@ CMakeFiles/chromack.dir/chromack_autogen/mocs_compilation.cpp.o
  /usr/include/qt6/QtCore/QHash
  /usr/include/qt6/QtCore/QObject
  /usr/include/qt6/QtCore/QPointer
+ /usr/include/qt6/QtCore/QRect
  /usr/include/qt6/QtCore/QString
  /usr/include/qt6/QtCore/q17memory.h
  /usr/include/qt6/QtCore/q20algorithm.h
@@ -2583,8 +2584,10 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o
  /usr/include/qt6/QtCore/QMargins
  /usr/include/qt6/QtCore/QObject
  /usr/include/qt6/QtCore/QPointer
+ /usr/include/qt6/QtCore/QProcess
  /usr/include/qt6/QtCore/QPropertyAnimation
  /usr/include/qt6/QtCore/QRect
+ /usr/include/qt6/QtCore/QRegularExpression
  /usr/include/qt6/QtCore/QSize
  /usr/include/qt6/QtCore/QSizeF
  /usr/include/qt6/QtCore/QStandardPaths
@@ -2687,10 +2690,12 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o
  /usr/include/qt6/QtCore/qpair.h
  /usr/include/qt6/QtCore/qpoint.h
  /usr/include/qt6/QtCore/qpointer.h
+ /usr/include/qt6/QtCore/qprocess.h
  /usr/include/qt6/QtCore/qprocessordetection.h
  /usr/include/qt6/QtCore/qpropertyanimation.h
  /usr/include/qt6/QtCore/qrect.h
  /usr/include/qt6/QtCore/qrefcount.h
+ /usr/include/qt6/QtCore/qregularexpression.h
  /usr/include/qt6/QtCore/qscopedpointer.h
  /usr/include/qt6/QtCore/qscopeguard.h
  /usr/include/qt6/QtCore/qset.h
@@ -2747,16 +2752,21 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o
  /usr/include/qt6/QtCore/qversiontagging.h
  /usr/include/qt6/QtCore/qxptype_traits.h
  /usr/include/qt6/QtCore/qyieldcpu.h
+ /usr/include/qt6/QtGui/QClipboard
  /usr/include/qt6/QtGui/QColor
  /usr/include/qt6/QtGui/QCursor
  /usr/include/qt6/QtGui/QGuiApplication
+ /usr/include/qt6/QtGui/QIcon
  /usr/include/qt6/QtGui/QKeyEvent
+ /usr/include/qt6/QtGui/QMouseEvent
+ /usr/include/qt6/QtGui/QPainter
  /usr/include/qt6/QtGui/QScreen
  /usr/include/qt6/QtGui/QTransform
  /usr/include/qt6/QtGui/QWindow
  /usr/include/qt6/QtGui/qaction.h
  /usr/include/qt6/QtGui/qbitmap.h
  /usr/include/qt6/QtGui/qbrush.h
+ /usr/include/qt6/QtGui/qclipboard.h
  /usr/include/qt6/QtGui/qcolor.h
  /usr/include/qt6/QtGui/qcursor.h
  /usr/include/qt6/QtGui/qevent.h
@@ -2773,6 +2783,7 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o
  /usr/include/qt6/QtGui/qinputmethod.h
  /usr/include/qt6/QtGui/qkeysequence.h
  /usr/include/qt6/QtGui/qpaintdevice.h
+ /usr/include/qt6/QtGui/qpainter.h
  /usr/include/qt6/QtGui/qpalette.h
  /usr/include/qt6/QtGui/qpen.h
  /usr/include/qt6/QtGui/qpicture.h
@@ -2800,15 +2811,19 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o
  /usr/include/qt6/QtGui/qwindow.h
  /usr/include/qt6/QtGui/qwindowdefs.h
  /usr/include/qt6/QtWidgets/QApplication
+ /usr/include/qt6/QtWidgets/QGridLayout
  /usr/include/qt6/QtWidgets/QHBoxLayout
  /usr/include/qt6/QtWidgets/QLabel
  /usr/include/qt6/QtWidgets/QLineEdit
  /usr/include/qt6/QtWidgets/QPushButton
  /usr/include/qt6/QtWidgets/QScrollArea
+ /usr/include/qt6/QtWidgets/QSlider
+ /usr/include/qt6/QtWidgets/QStyle
  /usr/include/qt6/QtWidgets/QVBoxLayout
  /usr/include/qt6/QtWidgets/QWidget
  /usr/include/qt6/QtWidgets/qabstractbutton.h
  /usr/include/qt6/QtWidgets/qabstractscrollarea.h
+ /usr/include/qt6/QtWidgets/qabstractslider.h
  /usr/include/qt6/QtWidgets/qapplication.h
  /usr/include/qt6/QtWidgets/qboxlayout.h
  /usr/include/qt6/QtWidgets/qframe.h
@@ -2820,6 +2835,8 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o
  /usr/include/qt6/QtWidgets/qpushbutton.h
  /usr/include/qt6/QtWidgets/qscrollarea.h
  /usr/include/qt6/QtWidgets/qsizepolicy.h
+ /usr/include/qt6/QtWidgets/qslider.h
+ /usr/include/qt6/QtWidgets/qstyle.h
  /usr/include/qt6/QtWidgets/qtwidgets-config.h
  /usr/include/qt6/QtWidgets/qtwidgetsexports.h
  /usr/include/qt6/QtWidgets/qtwidgetsglobal.h
@@ -3173,6 +3190,7 @@ CMakeFiles/chromack.dir/src/main.cpp.o
  /usr/include/qt6/QtCore/QObject
  /usr/include/qt6/QtCore/QPointer
  /usr/include/qt6/QtCore/QProcessEnvironment
+ /usr/include/qt6/QtCore/QRect
  /usr/include/qt6/QtCore/QStandardPaths
  /usr/include/qt6/QtCore/QString
  /usr/include/qt6/QtCore/q17memory.h

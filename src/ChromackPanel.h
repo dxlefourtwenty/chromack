@@ -9,6 +9,7 @@
 #include "ChromackConfig.h"
 
 class QFrame;
+class QGridLayout;
 class QHBoxLayout;
 class QLabel;
 class QLineEdit;
@@ -16,8 +17,10 @@ class QPushButton;
 class QPropertyAnimation;
 class QScreen;
 class QScrollArea;
+class QSlider;
 class QVBoxLayout;
 class QVariantAnimation;
+class SaturationValuePicker;
 #if CHROMACK_HAS_LAYERSHELLQT
 namespace LayerShellQt
 {
@@ -49,16 +52,22 @@ private slots:
 private:
     struct ColorRow {
         QString key;
-        QFrame *swatch = nullptr;
-        QLabel *nameLabel = nullptr;
-        QLabel *valueLabel = nullptr;
-        QLineEdit *input = nullptr;
+        QPushButton *materialButton = nullptr;
     };
 
     void buildUi();
     void buildColorRows();
-    void updateColorRow(ColorRow *row, const QColor &color);
+    void refreshMaterialButtons();
+    void refreshRecentButtons();
+    void setActiveColorKey(const QString &key);
     QColor colorForKey(const QString &key) const;
+    QColor activeColor() const;
+    void setActiveColor(const QColor &color, bool pushRecent);
+    void updateColorPreview();
+    void copyCurrentColor();
+    void copyHexValue();
+    void copyRgbaValue();
+    void copyTextValue(const QString &value);
     void updatePanelGeometry(bool animated);
     QPoint openPosition() const;
     QPoint closedPosition() const;
@@ -90,21 +99,57 @@ private:
     QFrame *headerBar_ = nullptr;
     QHBoxLayout *headerLayout_ = nullptr;
     QLabel *titleLabel_ = nullptr;
+    QLabel *subtitleLabel_ = nullptr;
     QPushButton *closeButton_ = nullptr;
 
     QScrollArea *scrollArea_ = nullptr;
     QWidget *pickerContainer_ = nullptr;
     QVBoxLayout *pickerLayout_ = nullptr;
 
+    QFrame *pickerTopFrame_ = nullptr;
+    QHBoxLayout *pickerTopLayout_ = nullptr;
+    SaturationValuePicker *svPicker_ = nullptr;
+    QSlider *hueSlider_ = nullptr;
+
+    QLabel *materialLabel_ = nullptr;
+    QFrame *materialGridFrame_ = nullptr;
+    QGridLayout *materialGridLayout_ = nullptr;
+
+    QLabel *recentLabel_ = nullptr;
+    QFrame *recentRowFrame_ = nullptr;
+    QHBoxLayout *recentRowLayout_ = nullptr;
+
+    QFrame *opacityRow_ = nullptr;
+    QHBoxLayout *opacityLayout_ = nullptr;
+    QLabel *opacityLabel_ = nullptr;
+    QSlider *opacitySlider_ = nullptr;
+    QFrame *opacityPreview_ = nullptr;
+
+    QFrame *hexRow_ = nullptr;
+    QHBoxLayout *hexLayout_ = nullptr;
+    QLabel *hexLabel_ = nullptr;
+    QLineEdit *hexInput_ = nullptr;
+    QLabel *rgbaLabel_ = nullptr;
+    QLineEdit *rgbaInput_ = nullptr;
+    QPushButton *copyHexButton_ = nullptr;
+    QPushButton *copyRgbaButton_ = nullptr;
+
     QFrame *footerBar_ = nullptr;
     QHBoxLayout *footerLayout_ = nullptr;
     QLabel *footerLabel_ = nullptr;
+    QPushButton *cancelButton_ = nullptr;
     QPushButton *applyButton_ = nullptr;
+    QPushButton *copyButton_ = nullptr;
 
     QList<ColorRow> colorRows_;
+    QList<QPushButton *> recentButtons_;
+    QList<QColor> recentColors_;
+
+    QString activeColorKey_;
     QPointer<QVariantAnimation> slideAnimation_;
     QPointer<QPropertyAnimation> fadeAnimation_;
     int panelOffsetX_ = 0;
+    bool syncingUi_ = false;
 
     bool open_ = false;
 #if CHROMACK_HAS_LAYERSHELLQT

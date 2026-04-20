@@ -1176,6 +1176,7 @@ CMakeFiles/chromack.dir/chromack_autogen/mocs_compilation.cpp.o: chromack_autoge
   /usr/include/qt6/QtCore/QHash \
   /usr/include/qt6/QtCore/QObject \
   /usr/include/qt6/QtCore/QPointer \
+  /usr/include/qt6/QtCore/QRect \
   /usr/include/qt6/QtCore/QString \
   /usr/include/qt6/QtCore/q17memory.h \
   /usr/include/qt6/QtCore/q20algorithm.h \
@@ -2578,8 +2579,10 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: /home/dxle/builds/chromack/src/
   /usr/include/qt6/QtCore/QMargins \
   /usr/include/qt6/QtCore/QObject \
   /usr/include/qt6/QtCore/QPointer \
+  /usr/include/qt6/QtCore/QProcess \
   /usr/include/qt6/QtCore/QPropertyAnimation \
   /usr/include/qt6/QtCore/QRect \
+  /usr/include/qt6/QtCore/QRegularExpression \
   /usr/include/qt6/QtCore/QSize \
   /usr/include/qt6/QtCore/QSizeF \
   /usr/include/qt6/QtCore/QStandardPaths \
@@ -2682,10 +2685,12 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: /home/dxle/builds/chromack/src/
   /usr/include/qt6/QtCore/qpair.h \
   /usr/include/qt6/QtCore/qpoint.h \
   /usr/include/qt6/QtCore/qpointer.h \
+  /usr/include/qt6/QtCore/qprocess.h \
   /usr/include/qt6/QtCore/qprocessordetection.h \
   /usr/include/qt6/QtCore/qpropertyanimation.h \
   /usr/include/qt6/QtCore/qrect.h \
   /usr/include/qt6/QtCore/qrefcount.h \
+  /usr/include/qt6/QtCore/qregularexpression.h \
   /usr/include/qt6/QtCore/qscopedpointer.h \
   /usr/include/qt6/QtCore/qscopeguard.h \
   /usr/include/qt6/QtCore/qset.h \
@@ -2742,16 +2747,21 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: /home/dxle/builds/chromack/src/
   /usr/include/qt6/QtCore/qversiontagging.h \
   /usr/include/qt6/QtCore/qxptype_traits.h \
   /usr/include/qt6/QtCore/qyieldcpu.h \
+  /usr/include/qt6/QtGui/QClipboard \
   /usr/include/qt6/QtGui/QColor \
   /usr/include/qt6/QtGui/QCursor \
   /usr/include/qt6/QtGui/QGuiApplication \
+  /usr/include/qt6/QtGui/QIcon \
   /usr/include/qt6/QtGui/QKeyEvent \
+  /usr/include/qt6/QtGui/QMouseEvent \
+  /usr/include/qt6/QtGui/QPainter \
   /usr/include/qt6/QtGui/QScreen \
   /usr/include/qt6/QtGui/QTransform \
   /usr/include/qt6/QtGui/QWindow \
   /usr/include/qt6/QtGui/qaction.h \
   /usr/include/qt6/QtGui/qbitmap.h \
   /usr/include/qt6/QtGui/qbrush.h \
+  /usr/include/qt6/QtGui/qclipboard.h \
   /usr/include/qt6/QtGui/qcolor.h \
   /usr/include/qt6/QtGui/qcursor.h \
   /usr/include/qt6/QtGui/qevent.h \
@@ -2768,6 +2778,7 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: /home/dxle/builds/chromack/src/
   /usr/include/qt6/QtGui/qinputmethod.h \
   /usr/include/qt6/QtGui/qkeysequence.h \
   /usr/include/qt6/QtGui/qpaintdevice.h \
+  /usr/include/qt6/QtGui/qpainter.h \
   /usr/include/qt6/QtGui/qpalette.h \
   /usr/include/qt6/QtGui/qpen.h \
   /usr/include/qt6/QtGui/qpicture.h \
@@ -2795,15 +2806,19 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: /home/dxle/builds/chromack/src/
   /usr/include/qt6/QtGui/qwindow.h \
   /usr/include/qt6/QtGui/qwindowdefs.h \
   /usr/include/qt6/QtWidgets/QApplication \
+  /usr/include/qt6/QtWidgets/QGridLayout \
   /usr/include/qt6/QtWidgets/QHBoxLayout \
   /usr/include/qt6/QtWidgets/QLabel \
   /usr/include/qt6/QtWidgets/QLineEdit \
   /usr/include/qt6/QtWidgets/QPushButton \
   /usr/include/qt6/QtWidgets/QScrollArea \
+  /usr/include/qt6/QtWidgets/QSlider \
+  /usr/include/qt6/QtWidgets/QStyle \
   /usr/include/qt6/QtWidgets/QVBoxLayout \
   /usr/include/qt6/QtWidgets/QWidget \
   /usr/include/qt6/QtWidgets/qabstractbutton.h \
   /usr/include/qt6/QtWidgets/qabstractscrollarea.h \
+  /usr/include/qt6/QtWidgets/qabstractslider.h \
   /usr/include/qt6/QtWidgets/qapplication.h \
   /usr/include/qt6/QtWidgets/qboxlayout.h \
   /usr/include/qt6/QtWidgets/qframe.h \
@@ -2815,6 +2830,8 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: /home/dxle/builds/chromack/src/
   /usr/include/qt6/QtWidgets/qpushbutton.h \
   /usr/include/qt6/QtWidgets/qscrollarea.h \
   /usr/include/qt6/QtWidgets/qsizepolicy.h \
+  /usr/include/qt6/QtWidgets/qslider.h \
+  /usr/include/qt6/QtWidgets/qstyle.h \
   /usr/include/qt6/QtWidgets/qtwidgets-config.h \
   /usr/include/qt6/QtWidgets/qtwidgetsexports.h \
   /usr/include/qt6/QtWidgets/qtwidgetsglobal.h \
@@ -3167,6 +3184,7 @@ CMakeFiles/chromack.dir/src/main.cpp.o: /home/dxle/builds/chromack/src/main.cpp 
   /usr/include/qt6/QtCore/QObject \
   /usr/include/qt6/QtCore/QPointer \
   /usr/include/qt6/QtCore/QProcessEnvironment \
+  /usr/include/qt6/QtCore/QRect \
   /usr/include/qt6/QtCore/QStandardPaths \
   /usr/include/qt6/QtCore/QString \
   /usr/include/qt6/QtCore/q17memory.h \
@@ -3514,6 +3532,26 @@ CMakeFiles/chromack.dir/chromack_autogen/mocs_compilation.cpp.o:
 
 /usr/lib/libmd4c.so.0:
 
+/usr/lib/libicuuc.so.78:
+
+/usr/lib/libicui18n.so.78:
+
+CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o:
+
+/usr/lib/libicudata.so.78:
+
+/usr/lib/libgraphite2.so.3:
+
+/usr/lib/libfreetype.so.6:
+
+/usr/lib/libfontconfig.so.1:
+
+/usr/lib/libffi.so.8:
+
+/usr/lib/libexpat.so.1:
+
+/usr/lib/libdouble-conversion.so.3:
+
 /usr/include/c++/15.2.1/bits/locale_facets_nonio.tcc:
 
 /usr/include/qt6/QtCore/qdatetime.h:
@@ -3587,6 +3625,8 @@ CMakeFiles/chromack.dir/chromack_autogen/mocs_compilation.cpp.o:
 /usr/include/string.h:
 
 /usr/include/stdlib.h:
+
+/usr/include/qt6/QtWidgets/qslider.h:
 
 /usr/lib/cmake/Qt6Gui/Qt6QVkKhrDisplayIntegrationPluginAdditionalTargetInfo.cmake:
 
@@ -3764,6 +3804,10 @@ CMakeFiles/chromack.dir/chromack_autogen/mocs_compilation.cpp.o:
 
 /usr/lib/cmake/Qt6/QtPublicSbomDepHelpers.cmake:
 
+/usr/lib/libdbus-1.so.3:
+
+/usr/include/bits/stdint-intn.h:
+
 /usr/include/bits/wctype-wchar.h:
 
 /usr/include/qt6/QtCore/qglobal.h:
@@ -3842,8 +3886,6 @@ CMakeFiles/chromack.dir/chromack_autogen/mocs_compilation.cpp.o:
 
 /usr/lib/cmake/Qt6Gui/Qt6QVkKhrDisplayIntegrationPluginTargets.cmake:
 
-/usr/lib/libgraphite2.so.3:
-
 /usr/include/qt6/QtCore/qatomic_cxx11.h:
 
 /usr/include/qt6/QtCore/qassert.h:
@@ -3901,6 +3943,10 @@ CMakeFiles/chromack.dir/chromack_autogen/mocs_compilation.cpp.o:
 /usr/lib/cmake/Qt6/Qt6TargetsPrecheck.cmake:
 
 /usr/lib/cmake/Qt6/QtPublicCMakeVersionHelpers.cmake:
+
+/usr/lib/libglib-2.0.so.0:
+
+/usr/include/qt6/QtCore/qfunctionpointer.h:
 
 /usr/include/qt6/QtCore/QString:
 
@@ -4113,10 +4159,6 @@ CMakeFiles/chromack.dir/src/ChromackConfig.cpp.o:
 /usr/lib/cmake/Qt6CoreTools/Qt6CoreToolsTargets-relwithdebinfo.cmake:
 
 /usr/lib/cmake/Qt6CoreTools/Qt6CoreToolsTargets.cmake:
-
-CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o:
-
-/usr/lib/libicudata.so.78:
 
 /usr/lib/cmake/Qt6/QtPublicSbomAttributionHelpers.cmake:
 
@@ -4430,9 +4472,7 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 
 /usr/include/c++/15.2.1/bits/stl_algobase.h:
 
-/usr/include/bits/setjmp.h:
-
-/usr/lib/cmake/Qt6Gui/Qt6DrmEglServerBufferPluginAdditionalTargetInfo.cmake:
+/usr/include/qt6/QtWidgets/qabstractslider.h:
 
 /usr/include/c++/15.2.1/tr1/hypergeometric.tcc:
 
@@ -4550,6 +4590,8 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QWaylandAdwaitaDecorationPluginAdditionalTargetInfo.cmake:
 
+/usr/include/qt6/QtGui/QIcon:
+
 /usr/lib/cmake/Qt6Gui/Qt6GuiConfigVersionImpl.cmake:
 
 /usr/include/c++/15.2.1/bits/specfun.h:
@@ -4563,6 +4605,8 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 /usr/include/c++/15.2.1/bits/stl_iterator.h:
 
 /usr/lib/cmake/Qt6Gui/Qt6QEglFSKmsGbmIntegrationPluginTargets.cmake:
+
+/usr/include/qt6/QtWidgets/QStyle:
 
 /usr/lib/cmake/Qt6Gui/Qt6QOffscreenIntegrationPluginConfig.cmake:
 
@@ -4646,6 +4690,8 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 
 /usr/include/qt6/QtCore/q23utility.h:
 
+/usr/include/qt6/QtGui/qclipboard.h:
+
 /usr/include/linux/posix_types.h:
 
 /usr/include/c++/15.2.1/bits/utility.h:
@@ -4693,8 +4739,6 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 /usr/include/qt6/QtCore/qobject_impl.h:
 
 /usr/include/endian.h:
-
-/usr/lib/libicuuc.so.78:
 
 /usr/include/c++/15.2.1/concepts:
 
@@ -4767,10 +4811,6 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 /usr/include/c++/15.2.1/iosfwd:
 
 /usr/include/qt6/QtCore/qdirlisting.h:
-
-/usr/include/bits/stdint-intn.h:
-
-/usr/lib/libdbus-1.so.3:
 
 /usr/include/c++/15.2.1/typeinfo:
 
@@ -4897,6 +4937,12 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 /usr/lib/cmake/Qt6Gui/Qt6GuiTargets-relwithdebinfo.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6GuiTargets.cmake:
+
+/usr/include/bits/setjmp.h:
+
+/usr/lib/cmake/Qt6Gui/Qt6DrmEglServerBufferPluginAdditionalTargetInfo.cmake:
+
+/usr/include/qt6/QtGui/QMouseEvent:
 
 /usr/lib/cmake/Qt6/QtPublicGitHelpers.cmake:
 
@@ -5104,6 +5150,8 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QPdfPluginTargetsPrecheck.cmake:
 
+/usr/include/qt6/QtWidgets/QGridLayout:
+
 /usr/include/bits/mathcalls-helper-functions.h:
 
 /usr/lib/cmake/Qt6Gui/Qt6QSvgIconPluginAdditionalTargetInfo.cmake:
@@ -5243,8 +5291,6 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 /usr/include/qt6/QtGui/qscreen_platform.h:
 
 /usr/lib/cmake/Qt6Gui/Qt6QWaylandIviShellIntegrationPluginTargets-relwithdebinfo.cmake:
-
-/usr/lib/libdouble-conversion.so.3:
 
 /usr/lib/cmake/Qt6Gui/Qt6QWaylandQtShellIntegrationPluginAdditionalTargetInfo.cmake:
 
@@ -5434,6 +5480,12 @@ CMakeFiles/chromack.dir/src/ChromackControl.cpp.o:
 
 /usr/share/cmake/Modules/CheckCXXCompilerFlag.cmake:
 
+/usr/lib/libharfbuzz.so.0:
+
+/usr/lib/cmake/Qt6Gui/Qt6QVkKhrDisplayIntegrationPluginTargetsPrecheck.cmake:
+
+/usr/share/cmake/Modules/CheckCXXSourceCompiles.cmake:
+
 /usr/include/asm/types.h:
 
 /usr/share/cmake/Modules/CheckLibraryExists.cmake:
@@ -5600,6 +5652,8 @@ chromack_autogen/mocs_compilation.cpp:
 
 /usr/include/wctype.h:
 
+/usr/include/qt6/QtCore/QProcess:
+
 /usr/include/qt6/QtCore/QPropertyAnimation:
 
 /usr/include/qt6/QtCore/QSizeF:
@@ -5620,6 +5674,8 @@ chromack_autogen/mocs_compilation.cpp:
 
 /usr/include/qt6/QtCore/qnativeinterface.h:
 
+/usr/include/qt6/QtGui/QClipboard:
+
 /usr/lib/cmake/Qt6/QtPublicAndroidHelpers.cmake:
 
 /usr/include/qt6/QtCore/qtimer.h:
@@ -5638,6 +5694,8 @@ chromack_autogen/mocs_compilation.cpp:
 
 /usr/include/qt6/QtGui/QKeyEvent:
 
+/usr/include/qt6/QtGui/QPainter:
+
 /usr/include/c++/15.2.1/memory:
 
 /usr/include/qt6/QtGui/QTransform:
@@ -5645,6 +5703,8 @@ chromack_autogen/mocs_compilation.cpp:
 /usr/include/qt6/QtGui/qinputdevice.h:
 
 /usr/include/qt6/QtGui/qinputmethod.h:
+
+/usr/include/qt6/QtGui/qpainter.h:
 
 /usr/include/qt6/QtGui/qscreen.h:
 
@@ -5657,6 +5717,8 @@ chromack_autogen/mocs_compilation.cpp:
 /usr/include/qt6/QtWidgets/QApplication:
 
 /usr/include/qt6/QtWidgets/QScrollArea:
+
+/usr/include/qt6/QtWidgets/QSlider:
 
 /usr/lib/cmake/Qt6Gui/Qt6QVncIntegrationPluginTargets.cmake:
 
@@ -5677,6 +5739,8 @@ chromack_autogen/mocs_compilation.cpp:
 /usr/include/qt6/QtWidgets/qlayoutitem.h:
 
 /usr/include/qt6/QtWidgets/qscrollarea.h:
+
+/usr/include/qt6/QtWidgets/qstyle.h:
 
 /usr/include/qt6/QtCore/QCommandLineOption:
 
@@ -5737,23 +5801,3 @@ chromack_autogen/mocs_compilation.cpp:
 /usr/lib/libbrotlidec.so.1:
 
 /usr/lib/libbz2.so.1.0:
-
-/usr/lib/libexpat.so.1:
-
-/usr/lib/libffi.so.8:
-
-/usr/lib/libfontconfig.so.1:
-
-/usr/lib/libfreetype.so.6:
-
-/usr/include/qt6/QtCore/qfunctionpointer.h:
-
-/usr/lib/libglib-2.0.so.0:
-
-/usr/lib/cmake/Qt6Gui/Qt6QVkKhrDisplayIntegrationPluginTargetsPrecheck.cmake:
-
-/usr/share/cmake/Modules/CheckCXXSourceCompiles.cmake:
-
-/usr/lib/libharfbuzz.so.0:
-
-/usr/lib/libicui18n.so.78:
