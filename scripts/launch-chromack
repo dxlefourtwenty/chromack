@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TOGGLE_SCRIPT="${TOGGLE_CHROMACK_SCRIPT:-$HOME/builds/chromack/scripts/toggle-chromack}"
+
+usage() {
+    printf 'Usage: %s [--dry-run]\n' "${0##*/}"
+}
+
+main() {
+    local dry_run=0
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run)
+                dry_run=1
+                ;;
+            --help|-h)
+                usage
+                return 0
+                ;;
+            *)
+                usage >&2
+                return 2
+                ;;
+        esac
+        shift
+    done
+
+    if [[ ! -x "$TOGGLE_SCRIPT" ]]; then
+        return 1
+    fi
+
+    if [[ "$dry_run" -eq 1 ]]; then
+        "$TOGGLE_SCRIPT" --launch --dry-run
+        return 0
+    fi
+
+    "$TOGGLE_SCRIPT" --launch
+}
+
+main "$@"

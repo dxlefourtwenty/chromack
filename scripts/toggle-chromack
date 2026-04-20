@@ -1,0 +1,237 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CHROMACK_QT_PLATFORM="${CHROMACK_QT_PLATFORM:-wayland}"
+CHROMACK_QT_SHELL_INTEGRATION="${CHROMACK_QT_SHELL_INTEGRATION:-layer-shell}"
+CHROMACK_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(/usr/bin/id -u)}"
+STATE_DIR="${CHROMACK_RUNTIME_DIR}/chromack"
+STATE_FILE="${CHROMACK_STATE_FILE:-${STATE_DIR}/panel.state}"
+BUSCTL_BIN="/usr/bin/busctl"
+PGREP_BIN="/usr/bin/pgrep"
+NOHUP_BIN="/usr/bin/nohup"
+SLEEP_BIN="/usr/bin/sleep"
+CHROMACK_SERVICE_NAME="org.dxle.chromack"
+DBUS_SERVICE_NAME="org.freedesktop.DBus"
+DBUS_PATH="/org/freedesktop/DBus"
+DBUS_INTERFACE="org.freedesktop.DBus"
+
+usage() {
+    printf 'Usage: %s [--launch|--open|--close|--toggle|--status] [--dry-run]\n' "${0##*/}"
+}
+
+resolve_chromack_bin() {
+    if [[ -n "${CHROMACK_BIN:-}" ]]; then
+        printf '%s\n' "$CHROMACK_BIN"
+        return
+    fi
+
+    local candidates=(
+        "$HOME/builds/chromack/build-chromack/chromack"
+        "$HOME/builds/chromack/build/chromack"
+    )
+
+    local path
+    for path in "${candidates[@]}"; do
+        if [[ -x "$path" ]]; then
+            printf '%s\n' "$path"
+            return
+        fi
+    done
+
+    printf '%s\n' "${candidates[0]}"
+}
+
+read_state() {
+    if [[ ! -r "$STATE_FILE" ]]; then
+        printf 'closed\n'
+        return
+    fi
+
+    local raw
+    raw="$(/usr/bin/head -n 1 "$STATE_FILE" 2>/dev/null || true)"
+    raw="$(printf '%s' "$raw" | /usr/bin/tr '[:upper:]' '[:lower:]' | /usr/bin/tr -d '[:space:]')"
+
+    case "$raw" in
+        open|opened|1|true|on)
+            printf 'open\n'
+            ;;
+        *)
+            printf 'closed\n'
+            ;;
+    esac
+}
+
+write_state() {
+    local state="$1"
+    local tmp_file
+
+    /usr/bin/mkdir -p "$STATE_DIR"
+    tmp_file="$(/usr/bin/mktemp "${STATE_DIR}/.panel.state.XXXXXX")"
+    printf '%s\n' "$state" > "$tmp_file"
+    /usr/bin/mv "$tmp_file" "$STATE_FILE"
+}
+
+is_chromack_running() {
+    "$PGREP_BIN" -x chromack >/dev/null 2>&1
+}
+
+has_control_service_owner() {
+    local output=""
+    output="$("$BUSCTL_BIN" --user call \
+        "$DBUS_SERVICE_NAME" \
+        "$DBUS_PATH" \
+        "$DBUS_INTERFACE" \
+        NameHasOwner s \
+        "$CHROMACK_SERVICE_NAME" 2>/dev/null || true)"
+
+    [[ "$output" == "b true" ]]
+}
+
+wait_for_control_service() {
+    for _ in {1..40}; do
+        if has_control_service_owner; then
+            return 0
+        fi
+        "$SLEEP_BIN" 0.05
+    done
+
+    return 1
+}
+
+start_chromack() {
+    local chromack_bin="$1"
+    [[ -x "$chromack_bin" ]] || return 1
+
+    QT_QPA_PLATFORM="$CHROMACK_QT_PLATFORM" \
+        QT_WAYLAND_SHELL_INTEGRATION="$CHROMACK_QT_SHELL_INTEGRATION" \
+        CHROMACK_START_OPEN=false \
+        CHROMACK_STATE_FILE="$STATE_FILE" \
+        XDG_RUNTIME_DIR="$CHROMACK_RUNTIME_DIR" \
+        "$NOHUP_BIN" "$chromack_bin" >/dev/null 2>&1 &
+
+    for _ in {1..40}; do
+        if is_chromack_running; then
+            return 0
+        fi
+        "$SLEEP_BIN" 0.05
+    done
+
+    return 1
+}
+
+invoke_control() {
+    local method="$1"
+    local bus_method=""
+
+    case "$method" in
+        open)
+            bus_method="Open"
+            ;;
+        close)
+            bus_method="Close"
+            ;;
+        toggle)
+            bus_method="Toggle"
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+
+    "$BUSCTL_BIN" --user call \
+        "$CHROMACK_SERVICE_NAME" \
+        /org/dxle/chromack \
+        org.dxle.chromack.Control \
+        "$bus_method" >/dev/null
+}
+
+main() {
+    local command="toggle"
+    local dry_run=0
+    local chromack_bin=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --open)
+                command="open"
+                ;;
+            --launch)
+                command="launch"
+                ;;
+            --close)
+                command="close"
+                ;;
+            --toggle)
+                command="toggle"
+                ;;
+            --status)
+                command="status"
+                ;;
+            --dry-run)
+                dry_run=1
+                ;;
+            --help|-h)
+                usage
+                return 0
+                ;;
+            *)
+                usage >&2
+                return 2
+                ;;
+        esac
+        shift
+    done
+
+    chromack_bin="$(resolve_chromack_bin)"
+
+    if [[ "$dry_run" -eq 1 ]]; then
+        printf 'binary=%s\n' "$chromack_bin"
+        printf 'command=%s\n' "$command"
+        return 0
+    fi
+
+    if [[ "$command" == "status" ]]; then
+        read_state
+        return 0
+    fi
+
+    if [[ "$command" == "launch" ]]; then
+        write_state "closed"
+        if ! has_control_service_owner; then
+            if ! is_chromack_running; then
+                start_chromack "$chromack_bin"
+            fi
+            wait_for_control_service
+        fi
+        return 0
+    fi
+
+    if ! has_control_service_owner; then
+        write_state "closed"
+        if ! is_chromack_running; then
+            start_chromack "$chromack_bin"
+        fi
+
+        wait_for_control_service
+    fi
+
+    invoke_control "$command"
+
+    case "$command" in
+        open)
+            write_state "open"
+            ;;
+        close)
+            write_state "closed"
+            ;;
+        toggle)
+            if [[ "$(read_state)" == "open" ]]; then
+                write_state "closed"
+            else
+                write_state "open"
+            fi
+            ;;
+    esac
+}
+
+main "$@"

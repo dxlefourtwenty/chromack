@@ -1,0 +1,36 @@
+# chromack config
+# paths accept ~, $VAR, and ${VAR}
+
+[layout]
+anchor = "top-right"
+screen = "HDMI-A-1"
+width = 420
+top_margin = 24
+right_margin = 24
+bottom_margin = 24
+left_margin = 24
+minimum_height = 360
+above_windows = true
+focusable = true
+
+[panel]
+start_open = false
+close_on_escape = true
+show_header = true
+show_footer = true
+title = "Chromack"
+footer_text = "style color picker"
+
+[animation]
+enabled = true
+duration_ms = 220
+fade = true
+fade_duration_ms = 160
+slide_distance = 24
+slide_direction = "right"
+easing = "out-cubic"
+
+[paths]
+style_css = "~/.config/chromack/style.css"
+colors_css = "~/.config/chromack/colors.css"
+state_file = "${XDG_RUNTIME_DIR}/chromack/panel.state"

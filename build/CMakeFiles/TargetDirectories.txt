@@ -1,0 +1,9 @@
+/home/dxle/builds/wardnc/build/CMakeFiles/wardnc.dir
+/home/dxle/builds/wardnc/build/CMakeFiles/edit_cache.dir
+/home/dxle/builds/wardnc/build/CMakeFiles/rebuild_cache.dir
+/home/dxle/builds/wardnc/build/CMakeFiles/list_install_components.dir
+/home/dxle/builds/wardnc/build/CMakeFiles/install.dir
+/home/dxle/builds/wardnc/build/CMakeFiles/install/local.dir
+/home/dxle/builds/wardnc/build/CMakeFiles/install/strip.dir
+/home/dxle/builds/wardnc/build/CMakeFiles/wardnc_autogen_timestamp_deps.dir
+/home/dxle/builds/wardnc/build/CMakeFiles/wardnc_autogen.dir

@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/dxle/builds/chromack/build-chromack/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -1,0 +1,79 @@
+@import "./colors.css";
+
+:root {
+    --font-family: "Noto Sans";
+    --panel-radius: 16px;
+    --panel-border-width: 1px;
+    --panel-padding: 14px;
+    --section-gap: 10px;
+    --row-height: 34px;
+    --row-radius: 8px;
+    --preview-size: 18px;
+}
+
+QWidget#chromackWindow {
+    background: transparent;
+}
+
+QWidget#chromackWindow,
+QWidget#chromackWindow * {
+    font-family: var(--font-family);
+}
+
+QFrame#panelRoot {
+    background: var(--color-surface);
+    border: var(--panel-border-width) solid var(--color-border);
+    border-radius: var(--panel-radius);
+}
+
+QFrame#headerBar,
+QFrame#footerBar,
+QWidget#pickerViewport,
+QWidget#pickerContainer {
+    background: var(--color-surface-alt);
+    border-radius: 10px;
+}
+
+QLabel#headerTitle,
+QLabel#footerLabel,
+QLabel#colorNameLabel {
+    color: var(--color-text);
+}
+
+QLabel#colorValueLabel {
+    color: var(--color-muted);
+}
+
+QLineEdit#colorInput {
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--row-radius);
+    padding: 0 8px;
+}
+
+QPushButton#applyButton,
+QPushButton#reloadButton,
+QPushButton#closeButton {
+    background: var(--color-primary);
+    color: var(--color-surface);
+    border: none;
+    border-radius: 8px;
+    padding: 0 10px;
+    min-height: 28px;
+    font-weight: 700;
+}
+
+QPushButton#reloadButton {
+    background: var(--color-secondary);
+}
+
+QPushButton#closeButton {
+    background: var(--color-danger);
+    color: var(--color-text);
+}
+
+QFrame#previewSwatch {
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+}
