@@ -132,6 +132,7 @@ QString defaultColorsContents()
         "    --color-surface-alt: #1f2937;\n"
         "    --color-panel-backdrop: transparent;\n"
         "    --color-picker-backdrop: var(--color-surface);\n"
+        "    --color-content-backdrop: var(--color-surface-alt);\n"
         "    --color-border: #374151;\n"
         "    --color-text: #f3f4f6;\n"
         "    --color-muted: #9ca3af;\n"
@@ -187,6 +188,7 @@ QString defaultStyleContents()
     --header-bg: var(--color-surface-alt);
     --footer-bg: var(--color-surface-alt);
     --content-bg: var(--color-surface-alt);
+    --content-backdrop-bg: var(--color-content-backdrop);
     --panel-bg: var(--color-surface);
     --panel-backdrop-bg: var(--color-panel-backdrop);
     --picker-backdrop-bg: var(--color-picker-backdrop);
@@ -239,6 +241,11 @@ QPushButton#closeButton {
     background: transparent;
     color: var(--text-main);
     font-weight: 700;
+}
+
+QScrollArea#pickerScrollArea {
+    background: var(--content-backdrop-bg);
+    border-radius: var(--content-radius);
 }
 
 QWidget#pickerViewport,

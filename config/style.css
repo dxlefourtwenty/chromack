@@ -42,6 +42,7 @@
     --header-bg: var(--color-surface-alt);
     --footer-bg: var(--color-surface-alt);
     --content-bg: var(--color-surface-alt);
+    --content-backdrop-bg: var(--color-content-backdrop);
     --panel-bg: var(--color-surface);
     --panel-backdrop-bg: var(--color-panel-backdrop);
     --picker-backdrop-bg: var(--color-picker-backdrop);
@@ -94,6 +95,11 @@ QPushButton#closeButton {
     background: transparent;
     color: var(--text-main);
     font-weight: 700;
+}
+
+QScrollArea#pickerScrollArea {
+    background: var(--content-backdrop-bg);
+    border-radius: var(--content-radius);
 }
 
 QWidget#pickerViewport,

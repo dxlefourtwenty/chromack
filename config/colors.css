@@ -4,6 +4,9 @@
     --color-accent: #ffd166;
     --color-surface: #111827;
     --color-surface-alt: #1f2937;
+    --color-panel-backdrop: transparent;
+    --color-picker-backdrop: var(--color-surface);
+    --color-content-backdrop: var(--color-surface-alt);
     --color-border: #374151;
     --color-text: #f3f4f6;
     --color-muted: #9ca3af;
