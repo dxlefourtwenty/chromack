@@ -19,6 +19,7 @@ close_on_escape = true
 show_header = true
 scrollbar = "auto"
 title = "Chromack"
+eyedropper_command = "~/bin/launch-colorpicker"
 
 [animation]
 enabled = true

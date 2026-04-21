@@ -69,6 +69,7 @@ private:
     void copyHexValue();
     void copyRgbaValue();
     void copyTextValue(const QString &value);
+    void launchEyedropper();
     void pushRecentColor(const QColor &color, bool persist);
     void loadRecentColors();
     void writeRecentColors();
@@ -108,6 +109,7 @@ private:
     QHBoxLayout *headerLayout_ = nullptr;
     QLabel *titleLabel_ = nullptr;
     QLabel *subtitleLabel_ = nullptr;
+    QPushButton *eyedropperButton_ = nullptr;
     QPushButton *closeButton_ = nullptr;
 
     QScrollArea *scrollArea_ = nullptr;

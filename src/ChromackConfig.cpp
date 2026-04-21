@@ -103,6 +103,7 @@ QString defaultConfigContents()
         "show_header = true\n"
         "scrollbar = \"auto\"\n"
         "title = \"Chromack\"\n"
+        "eyedropper_command = \"~/bin/launch-colorpicker\"\n"
         "\n"
         "[animation]\n"
         "enabled = true\n"
@@ -296,7 +297,8 @@ QLabel#headerSubtitle {
     font-size: var(--subtitle-size);
 }
 
-QPushButton#closeButton {
+QPushButton#closeButton,
+QPushButton#eyedropperButton {
     min-height: var(--button-height);
     min-width: var(--button-height);
     border: var(--control-border-width) solid var(--control-border-color);
@@ -304,6 +306,12 @@ QPushButton#closeButton {
     background: transparent;
     color: var(--text-main);
     font-weight: 700;
+}
+
+QPushButton#eyedropperButton {
+    font-family: "Symbols Nerd Font Mono", var(--font-family);
+    font-size: 16px;
+    font-weight: 500;
 }
 
 QScrollArea#pickerScrollArea {
@@ -951,6 +959,8 @@ void loadConfig(const QString &path, ChromackConfig *config)
                 parseString(value, &config->panel.scrollbar);
             } else if (key == QStringLiteral("title")) {
                 parseString(value, &config->panel.title);
+            } else if (key == QStringLiteral("eyedropper_command")) {
+                parseString(value, &config->panel.eyedropperCommand);
             }
         } else if (section == QStringLiteral("animation")) {
             if (key == QStringLiteral("enabled")) {

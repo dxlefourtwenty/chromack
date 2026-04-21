@@ -598,8 +598,13 @@ void ChromackPanel::buildUi()
 
     closeButton_ = new QPushButton(QStringLiteral("X"), headerBar_);
     closeButton_->setObjectName(QStringLiteral("closeButton"));
+    eyedropperButton_ = new QPushButton(headerBar_);
+    eyedropperButton_->setObjectName(QStringLiteral("eyedropperButton"));
+    eyedropperButton_->setText(QString::fromUtf8(u8""));
+    eyedropperButton_->setToolTip(QStringLiteral("Launch color picker"));
 
     headerLayout_->addWidget(titleWrap, 1);
+    headerLayout_->addWidget(eyedropperButton_);
     headerLayout_->addWidget(closeButton_);
 
     panelLayout_->addWidget(headerBar_);
@@ -802,6 +807,7 @@ void ChromackPanel::buildUi()
         reloadConfiguration();
         closePanel();
     });
+    connect(eyedropperButton_, &QPushButton::clicked, this, &ChromackPanel::launchEyedropper);
     connect(copyHexButton_, &QPushButton::clicked, this, &ChromackPanel::copyHexValue);
     connect(copyRgbaButton_, &QPushButton::clicked, this, &ChromackPanel::copyRgbaValue);
     connect(paletteGenerateButton_, &QPushButton::clicked, this, &ChromackPanel::generatePastelPalette);
@@ -1206,6 +1212,29 @@ void ChromackPanel::copyTextValue(const QString &value)
     }
 
     notifyCopiedColor(value, copiedColor);
+}
+
+void ChromackPanel::launchEyedropper()
+{
+    const QString command = config_.panel.eyedropperCommand.trimmed();
+    if (!command.isEmpty()) {
+        const QStringList args = {
+            QStringLiteral("-lc"),
+            command
+        };
+        if (!QProcess::startDetached(QStringLiteral("/usr/bin/bash"), args)) {
+            QProcess::startDetached(QStringLiteral("/usr/bin/notify-send"),
+                                    QStringList()
+                                        << QStringLiteral("-t")
+                                        << QStringLiteral("5000")
+                                        << QStringLiteral("Chromack")
+                                        << QStringLiteral("Failed to launch eyedropper command"));
+        }
+    }
+
+    writeColors();
+    reloadConfiguration();
+    closePanel();
 }
 
 QColor ChromackPanel::runPastelTransform(const QStringList &args, bool *ok) const
