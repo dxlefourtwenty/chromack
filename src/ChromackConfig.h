@@ -41,6 +41,7 @@ struct ChromackAnimationConfig {
 struct ChromackPathsConfig {
     QString styleCss = QStringLiteral("~/.config/chromack/style.css");
     QString colorsCss = QStringLiteral("~/.config/chromack/colors.css");
+    QString materialCss = QStringLiteral("~/.config/chromack/material.css");
     QString stateFile = QStringLiteral("$XDG_RUNTIME_DIR/chromack/panel.state");
 };
 

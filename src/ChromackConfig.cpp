@@ -118,6 +118,7 @@ QString defaultConfigContents()
         "[paths]\n"
         "style_css = \"~/.config/chromack/style.css\"\n"
         "colors_css = \"~/.config/chromack/colors.css\"\n"
+        "material_css = \"~/.config/chromack/material.css\"\n"
         "state_file = \"${XDG_RUNTIME_DIR}/chromack/panel.state\"\n");
 }
 
@@ -142,9 +143,65 @@ QString defaultColorsContents()
         "}\n");
 }
 
+QString defaultMaterialContents()
+{
+    return QStringLiteral(
+        ":root {\n"
+        "    --color-material-01: #f44336;\n"
+        "    --color-material-02: #e91e63;\n"
+        "    --color-material-03: #9c27b0;\n"
+        "    --color-material-04: #673ab7;\n"
+        "    --color-material-05: #3f51b5;\n"
+        "    --color-material-06: #2196f3;\n"
+        "    --color-material-07: #03a9f4;\n"
+        "    --color-material-08: #00bcd4;\n"
+        "    --color-material-09: #009688;\n"
+        "    --color-material-10: #4caf50;\n"
+        "    --color-material-11: #8bc34a;\n"
+        "    --color-material-12: #cddc39;\n"
+        "    --color-material-13: #ffeb3b;\n"
+        "    --color-material-14: #ffc107;\n"
+        "    --color-material-15: #ff9800;\n"
+        "    --color-material-16: #ff5722;\n"
+        "    --color-material-17: #ef5350;\n"
+        "    --color-material-18: #ec407a;\n"
+        "    --color-material-19: #ab47bc;\n"
+        "    --color-material-20: #7e57c2;\n"
+        "    --color-material-21: #5c6bc0;\n"
+        "    --color-material-22: #42a5f5;\n"
+        "    --color-material-23: #29b6f6;\n"
+        "    --color-material-24: #26c6da;\n"
+        "    --color-material-25: #26a69a;\n"
+        "    --color-material-26: #66bb6a;\n"
+        "    --color-material-27: #9ccc65;\n"
+        "    --color-material-28: #d4e157;\n"
+        "    --color-material-29: #ffee58;\n"
+        "    --color-material-30: #ffca28;\n"
+        "    --color-material-31: #ffa726;\n"
+        "    --color-material-32: #ff7043;\n"
+        "    --color-material-33: #d32f2f;\n"
+        "    --color-material-34: #c2185b;\n"
+        "    --color-material-35: #7b1fa2;\n"
+        "    --color-material-36: #512da8;\n"
+        "    --color-material-37: #303f9f;\n"
+        "    --color-material-38: #1976d2;\n"
+        "    --color-material-39: #0288d1;\n"
+        "    --color-material-40: #0097a7;\n"
+        "    --color-material-41: #00796b;\n"
+        "    --color-material-42: #388e3c;\n"
+        "    --color-material-43: #689f38;\n"
+        "    --color-material-44: #afb42b;\n"
+        "    --color-material-45: #f57f17;\n"
+        "    --color-material-46: #ffffff;\n"
+        "    --color-material-47: #9e9e9e;\n"
+        "    --color-material-48: #000000;\n"
+        "}\n");
+}
+
 QString defaultStyleContents()
 {
     return QStringLiteral(R"(@import "./colors.css";
+@import "./material.css";
 
 :root {
     --font-family: "Noto Sans";
@@ -655,6 +712,8 @@ void loadConfig(const QString &path, ChromackConfig *config)
                 parseString(value, &config->paths.styleCss);
             } else if (key == QStringLiteral("colors_css")) {
                 parseString(value, &config->paths.colorsCss);
+            } else if (key == QStringLiteral("material_css")) {
+                parseString(value, &config->paths.materialCss);
             } else if (key == QStringLiteral("state_file")) {
                 parseString(value, &config->paths.stateFile);
             }
@@ -698,6 +757,11 @@ QString resolvedColorsPath(const ChromackConfig &config)
     return normalizePath(config.paths.colorsCss);
 }
 
+QString resolvedMaterialPath(const ChromackConfig &config)
+{
+    return normalizePath(config.paths.materialCss);
+}
+
 } // namespace
 
 ChromackConfigLoader::ChromackConfigLoader(QObject *parent)
@@ -736,14 +800,31 @@ void ChromackConfigLoader::reload()
     config_ = loaded;
 
     const QString stylePath = resolvedStylePath(config_);
+    const QString colorsPath = resolvedColorsPath(config_);
+    const QString materialPath = resolvedMaterialPath(config_);
     const QString styleText = readTextFile(stylePath);
 
     QSet<QString> visited;
     visited.insert(stylePath);
 
     QString resolvedText = resolveImports(styleText, QFileInfo(stylePath).absolutePath(), &visited);
+    if (!visited.contains(colorsPath)) {
+        const QString colorsText = readTextFile(colorsPath);
+        if (!colorsText.isEmpty()) {
+            visited.insert(colorsPath);
+            resolvedText += QLatin1Char('\n') + colorsText;
+        }
+    }
+    if (!visited.contains(materialPath)) {
+        const QString materialText = readTextFile(materialPath);
+        if (!materialText.isEmpty()) {
+            visited.insert(materialPath);
+            resolvedText += QLatin1Char('\n') + materialText;
+        }
+    }
     if (resolvedText.trimmed().isEmpty()) {
-        resolvedText = defaultColorsContents() + QStringLiteral("\n") + defaultStyleContents();
+        resolvedText = defaultColorsContents() + QStringLiteral("\n") +
+            defaultMaterialContents() + QStringLiteral("\n") + defaultStyleContents();
     }
 
     styleVariables_ = extractVariables(resolvedText);
@@ -765,10 +846,12 @@ void ChromackConfigLoader::ensureConfigFiles()
     copyIfMissing(oldDir + QStringLiteral("/config.toml"), cfgDir + QStringLiteral("/config.toml"));
     copyIfMissing(oldDir + QStringLiteral("/style.css"), cfgDir + QStringLiteral("/style.css"));
     copyIfMissing(oldDir + QStringLiteral("/colors.css"), cfgDir + QStringLiteral("/colors.css"));
+    copyIfMissing(oldDir + QStringLiteral("/material.css"), cfgDir + QStringLiteral("/material.css"));
 
     const QString configFile = cfgDir + QStringLiteral("/config.toml");
     const QString styleFile = cfgDir + QStringLiteral("/style.css");
     const QString colorsFile = cfgDir + QStringLiteral("/colors.css");
+    const QString materialFile = cfgDir + QStringLiteral("/material.css");
 
     if (!QFile::exists(configFile)) {
         QFile file(configFile);
@@ -790,6 +873,13 @@ void ChromackConfigLoader::ensureConfigFiles()
             file.write(defaultColorsContents().toUtf8());
         }
     }
+
+    if (!QFile::exists(materialFile)) {
+        QFile file(materialFile);
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            file.write(defaultMaterialContents().toUtf8());
+        }
+    }
 }
 
 void ChromackConfigLoader::refreshWatchers()
@@ -804,12 +894,14 @@ void ChromackConfigLoader::refreshWatchers()
     const QString configFile = normalizePath(configPath());
     const QString styleFile = resolvedStylePath(config_);
     const QString colorsFile = resolvedColorsPath(config_);
+    const QString materialFile = resolvedMaterialPath(config_);
 
-    const QStringList files = {configFile, styleFile, colorsFile};
+    const QStringList files = {configFile, styleFile, colorsFile, materialFile};
     QStringList dirs = {
         QFileInfo(configFile).absolutePath(),
         QFileInfo(styleFile).absolutePath(),
         QFileInfo(colorsFile).absolutePath(),
+        QFileInfo(materialFile).absolutePath(),
         configDirectory()
     };
 

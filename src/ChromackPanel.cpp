@@ -30,6 +30,7 @@
 #include <QVariantAnimation>
 #include <QVBoxLayout>
 #include <QWindow>
+#include <algorithm>
 #include <functional>
 #include <unistd.h>
 #if CHROMACK_HAS_LAYERSHELLQT
@@ -149,21 +150,18 @@ QString materialPaletteKey(int index)
 const QStringList &materialPaletteColors()
 {
     static const QStringList colors = {
-        QStringLiteral("#e53935"), QStringLiteral("#d81b60"), QStringLiteral("#8e24aa"), QStringLiteral("#5e35b1"),
-        QStringLiteral("#3949ab"), QStringLiteral("#1e88e5"), QStringLiteral("#039be5"), QStringLiteral("#00acc1"),
-        QStringLiteral("#00897b"), QStringLiteral("#43a047"), QStringLiteral("#7cb342"), QStringLiteral("#c0ca33"),
-        QStringLiteral("#fdd835"), QStringLiteral("#ffb300"), QStringLiteral("#fb8c00"), QStringLiteral("#f4511e"),
-        QStringLiteral("#e53935"), QStringLiteral("#c62828"),
-        QStringLiteral("#d81b60"), QStringLiteral("#8e24aa"), QStringLiteral("#5e35b1"), QStringLiteral("#3949ab"),
-        QStringLiteral("#1e88e5"), QStringLiteral("#039be5"), QStringLiteral("#00acc1"), QStringLiteral("#00897b"),
-        QStringLiteral("#43a047"), QStringLiteral("#7cb342"), QStringLiteral("#9e9d24"), QStringLiteral("#fbc02d"),
-        QStringLiteral("#ffa000"), QStringLiteral("#fb8c00"), QStringLiteral("#f4511e"), QStringLiteral("#e53935"),
-        QStringLiteral("#ad1457"), QStringLiteral("#880e4f"),
-        QStringLiteral("#6a1b9a"), QStringLiteral("#4527a0"), QStringLiteral("#283593"), QStringLiteral("#1565c0"),
-        QStringLiteral("#0277bd"), QStringLiteral("#00838f"), QStringLiteral("#00695c"), QStringLiteral("#2e7d32"),
-        QStringLiteral("#558b2f"), QStringLiteral("#9e9d24"), QStringLiteral("#f9a825"), QStringLiteral("#ff8f00"),
-        QStringLiteral("#ef6c00"), QStringLiteral("#d84315"), QStringLiteral("#bf360c"), QStringLiteral("#f5f5f5"),
-        QStringLiteral("#e0e0e0"), QStringLiteral("#bdbdbd")
+        QStringLiteral("#f44336"), QStringLiteral("#e91e63"), QStringLiteral("#9c27b0"), QStringLiteral("#673ab7"),
+        QStringLiteral("#3f51b5"), QStringLiteral("#2196f3"), QStringLiteral("#03a9f4"), QStringLiteral("#00bcd4"),
+        QStringLiteral("#009688"), QStringLiteral("#4caf50"), QStringLiteral("#8bc34a"), QStringLiteral("#cddc39"),
+        QStringLiteral("#ffeb3b"), QStringLiteral("#ffc107"), QStringLiteral("#ff9800"), QStringLiteral("#ff5722"),
+        QStringLiteral("#ef5350"), QStringLiteral("#ec407a"), QStringLiteral("#ab47bc"), QStringLiteral("#7e57c2"),
+        QStringLiteral("#5c6bc0"), QStringLiteral("#42a5f5"), QStringLiteral("#29b6f6"), QStringLiteral("#26c6da"),
+        QStringLiteral("#26a69a"), QStringLiteral("#66bb6a"), QStringLiteral("#9ccc65"), QStringLiteral("#d4e157"),
+        QStringLiteral("#ffee58"), QStringLiteral("#ffca28"), QStringLiteral("#ffa726"), QStringLiteral("#ff7043"),
+        QStringLiteral("#d32f2f"), QStringLiteral("#c2185b"), QStringLiteral("#7b1fa2"), QStringLiteral("#512da8"),
+        QStringLiteral("#303f9f"), QStringLiteral("#1976d2"), QStringLiteral("#0288d1"), QStringLiteral("#0097a7"),
+        QStringLiteral("#00796b"), QStringLiteral("#388e3c"), QStringLiteral("#689f38"), QStringLiteral("#afb42b"),
+        QStringLiteral("#f57f17"), QStringLiteral("#ffffff"), QStringLiteral("#9e9e9e"), QStringLiteral("#000000")
     };
     return colors;
 }
@@ -292,6 +290,11 @@ QString toRgbaColor(const QColor &color)
         .arg(color.green())
         .arg(color.blue())
         .arg(alpha);
+}
+
+bool isMaterialColorKey(const QString &key)
+{
+    return key.startsWith(QStringLiteral("--color-material-"));
 }
 
 QList<QPair<QString, QString>> extractNonColorVariables(const QString &text)
@@ -684,30 +687,30 @@ void ChromackPanel::buildColorRows()
 
     colorRows_.clear();
 
-    QStringList orderedKeys = {
-        QStringLiteral("--color-primary"),
-        QStringLiteral("--color-secondary"),
-        QStringLiteral("--color-accent"),
-        QStringLiteral("--color-surface"),
-        QStringLiteral("--color-surface-alt"),
-        QStringLiteral("--color-border"),
-        QStringLiteral("--color-text"),
-        QStringLiteral("--color-muted"),
-        QStringLiteral("--color-success"),
-        QStringLiteral("--color-warning"),
-        QStringLiteral("--color-danger")
-    };
-
+    QStringList orderedKeys;
+    QList<int> materialIndices;
     for (auto it = styleVariables_.cbegin(); it != styleVariables_.cend(); ++it) {
-        if (it.key().startsWith(QStringLiteral("--color-")) && !orderedKeys.contains(it.key())) {
-            orderedKeys.append(it.key());
+        const QString key = it.key();
+        if (!isMaterialColorKey(key)) {
+            continue;
+        }
+
+        bool ok = false;
+        const int index = key.mid(QStringLiteral("--color-material-").size()).toInt(&ok);
+        if (ok && index > 0) {
+            materialIndices.append(index);
         }
     }
 
+    std::sort(materialIndices.begin(), materialIndices.end());
+    materialIndices.erase(std::unique(materialIndices.begin(), materialIndices.end()), materialIndices.end());
+    for (const int index : materialIndices) {
+        orderedKeys.append(QStringLiteral("--color-material-%1").arg(index, 2, 10, QLatin1Char('0')));
+    }
+
     const QStringList materialColors = materialPaletteColors();
-    const int targetMaterialSlots = kMaterialGridColumns * kMaterialGridRows;
     int paletteIndex = 0;
-    while (orderedKeys.size() < targetMaterialSlots && paletteIndex < materialColors.size()) {
+    while (paletteIndex < materialColors.size()) {
         const QString key = materialPaletteKey(paletteIndex);
         ++paletteIndex;
         if (orderedKeys.contains(key)) {
@@ -719,6 +722,7 @@ void ChromackPanel::buildColorRows()
         }
     }
 
+    const int targetMaterialSlots = kMaterialGridColumns * kMaterialGridRows;
     if (orderedKeys.size() > targetMaterialSlots) {
         orderedKeys = orderedKeys.mid(0, targetMaterialSlots);
     }
@@ -750,17 +754,8 @@ void ChromackPanel::buildColorRows()
         }
     }
 
-    if (!activeColorKey_.isEmpty()) {
-        bool found = false;
-        for (const ColorRow &rowValue : colorRows_) {
-            if (rowValue.key == activeColorKey_) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            activeColorKey_.clear();
-        }
+    if (!activeColorKey_.isEmpty() && !styleVariables_.contains(activeColorKey_)) {
+        activeColorKey_.clear();
     }
 
     if (activeColorKey_.isEmpty() && !colorRows_.isEmpty()) {
@@ -1365,42 +1360,70 @@ void ChromackPanel::setPanelOpen(bool open, bool animated, bool writeState)
 
 void ChromackPanel::writeColors()
 {
-    QFile file(colorsFilePath());
-    const QFileInfo info(file.fileName());
-    QDir().mkpath(info.absolutePath());
+    const QString colorsPath = colorsFilePath();
+    const QString materialPath = materialFilePath();
 
-    QString existingText;
-    if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        existingText = QString::fromUtf8(file.readAll());
-        file.close();
-    }
-    const QList<QPair<QString, QString>> preservedVariables = extractNonColorVariables(existingText);
+    const auto writeVariablesFile = [this](const QString &path, const std::function<bool(const QString &)> &keyFilter) {
+        QFile file(path);
+        const QFileInfo info(path);
+        QDir().mkpath(info.absolutePath());
 
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QString existingText;
+        if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            existingText = QString::fromUtf8(file.readAll());
+            file.close();
+        }
+        const QList<QPair<QString, QString>> preservedVariables = extractNonColorVariables(existingText);
+
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            return false;
+        }
+
+        QTextStream stream(&file);
+        stream << ":root {\n";
+
+        for (const ColorRow &row : colorRows_) {
+            if (!keyFilter(row.key)) {
+                continue;
+            }
+            const QColor color = colorForKey(row.key);
+            stream << "    " << row.key << ": " << toCssColor(color) << ";\n";
+        }
+
+        if (!preservedVariables.isEmpty()) {
+            stream << '\n';
+            for (const auto &entry : preservedVariables) {
+                stream << "    " << entry.first << ": " << entry.second << ";\n";
+            }
+        }
+
+        stream << "}\n";
+        return true;
+    };
+
+    if (colorsPath == materialPath) {
+        writeVariablesFile(colorsPath, [](const QString &) {
+            return true;
+        });
         return;
     }
 
-    QTextStream stream(&file);
-    stream << ":root {\n";
-
-    for (const ColorRow &row : colorRows_) {
-        const QColor color = colorForKey(row.key);
-        stream << "    " << row.key << ": " << toCssColor(color) << ";\n";
-    }
-
-    if (!preservedVariables.isEmpty()) {
-        stream << '\n';
-        for (const auto &entry : preservedVariables) {
-            stream << "    " << entry.first << ": " << entry.second << ";\n";
-        }
-    }
-
-    stream << "}\n";
+    writeVariablesFile(colorsPath, [](const QString &key) {
+        return !isMaterialColorKey(key);
+    });
+    writeVariablesFile(materialPath, [](const QString &key) {
+        return isMaterialColorKey(key);
+    });
 }
 
 QString ChromackPanel::colorsFilePath() const
 {
     return expandPath(config_.paths.colorsCss);
+}
+
+QString ChromackPanel::materialFilePath() const
+{
+    return expandPath(config_.paths.materialCss);
 }
 
 QString ChromackPanel::stateFilePath() const

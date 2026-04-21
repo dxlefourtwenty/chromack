@@ -8,6 +8,7 @@ STATE_DIR="${CHROMACK_RUNTIME_DIR}/chromack"
 STATE_FILE="${CHROMACK_STATE_FILE:-${STATE_DIR}/panel.state}"
 PKILL_BIN="/usr/bin/pkill"
 PGREP_BIN="/usr/bin/pgrep"
+KILL_BIN="/usr/bin/kill"
 SLEEP_BIN="/usr/bin/sleep"
 NOHUP_BIN="/usr/bin/nohup"
 
@@ -46,6 +47,16 @@ collect_pids() {
     } | /usr/bin/awk 'NF { print $1 }' | /usr/bin/awk '!seen[$1]++'
 }
 
+write_state() {
+    local state="$1"
+    local tmp_file=""
+
+    /usr/bin/mkdir -p "$STATE_DIR"
+    tmp_file="$(/usr/bin/mktemp "${STATE_DIR}/.panel.state.XXXXXX")"
+    printf '%s\n' "$state" > "$tmp_file"
+    /usr/bin/mv "$tmp_file" "$STATE_FILE"
+}
+
 stop_chromack() {
     local chromack_bin="$1"
     local pids=()
@@ -62,6 +73,17 @@ stop_chromack() {
         "$SLEEP_BIN" 0.05
     done
 
+    mapfile -t pids < <(collect_pids "$chromack_bin")
+    if [[ ${#pids[@]} -gt 0 ]]; then
+        "$KILL_BIN" -9 "${pids[@]}" >/dev/null 2>&1 || true
+    fi
+
+    for _ in {1..20}; do
+        mapfile -t pids < <(collect_pids "$chromack_bin")
+        [[ ${#pids[@]} -eq 0 ]] && return 0
+        "$SLEEP_BIN" 0.05
+    done
+
     return 1
 }
 
@@ -70,6 +92,7 @@ start_chromack() {
 
     QT_QPA_PLATFORM="$CHROMACK_QT_PLATFORM" \
         QT_WAYLAND_SHELL_INTEGRATION="$CHROMACK_QT_SHELL_INTEGRATION" \
+        CHROMACK_START_OPEN=false \
         CHROMACK_STATE_FILE="$STATE_FILE" \
         XDG_RUNTIME_DIR="$CHROMACK_RUNTIME_DIR" \
         "$NOHUP_BIN" "$chromack_bin" >/dev/null 2>&1 &
@@ -115,15 +138,14 @@ main() {
 
     if [[ "$dry_run" -eq 1 ]]; then
         printf 'binary=%s\n' "$chromack_bin"
+        printf 'state=closed\n'
         return 0
     fi
 
     [[ -x "$chromack_bin" ]] || return 1
 
-    /usr/bin/mkdir -p "$STATE_DIR"
-    printf 'closed\n' > "$STATE_FILE"
-
-    stop_chromack "$chromack_bin" || true
+    stop_chromack "$chromack_bin"
+    write_state "closed"
     start_chromack "$chromack_bin"
     wait_for_chromack "$chromack_bin"
 }

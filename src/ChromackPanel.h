@@ -84,6 +84,7 @@ private:
     void setPanelOpen(bool open, bool animated, bool writeState);
     void writeColors();
     QString colorsFilePath() const;
+    QString materialFilePath() const;
     QString stateFilePath() const;
     QString expandPath(QString value) const;
     void writeStateFile(const QString &value);
