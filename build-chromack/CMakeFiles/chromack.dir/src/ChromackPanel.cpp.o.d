@@ -441,6 +441,13 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: \
  /usr/include/qt6/QtCore/QStandardPaths \
  /usr/include/qt6/QtCore/qstandardpaths.h \
  /usr/include/qt6/QtWidgets/QStyle /usr/include/qt6/QtWidgets/qstyle.h \
+ /usr/include/qt6/QtWidgets/QStyleOptionSlider \
+ /usr/include/qt6/QtWidgets/qstyleoption.h \
+ /usr/include/qt6/QtWidgets/qabstractspinbox.h \
+ /usr/include/qt6/QtGui/qvalidator.h /usr/include/qt6/QtWidgets/qtabbar.h \
+ /usr/include/qt6/QtWidgets/qtabwidget.h \
+ /usr/include/qt6/QtWidgets/qrubberband.h \
+ /usr/include/qt6/QtCore/qabstractitemmodel.h \
  /usr/include/qt6/QtCore/QTextStream /usr/include/qt6/QtCore/QTimer \
  /usr/include/qt6/QtCore/qtimer.h \
  /usr/include/qt6/QtCore/QVariantAnimation \

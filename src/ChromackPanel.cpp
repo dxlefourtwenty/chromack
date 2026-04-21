@@ -25,6 +25,7 @@
 #include <QSlider>
 #include <QStandardPaths>
 #include <QStyle>
+#include <QStyleOptionSlider>
 #include <QTextStream>
 #include <QTimer>
 #include <QVariantAnimation>
@@ -133,6 +134,56 @@ private:
     qreal hue_ = 0.0;
     qreal saturation_ = 1.0;
     qreal value_ = 1.0;
+};
+
+class SeekOnClickSlider : public QSlider {
+public:
+    using QSlider::QSlider;
+
+protected:
+    void mousePressEvent(QMouseEvent *event) override
+    {
+        if (event->button() == Qt::LeftButton) {
+            seekTo(event->position());
+        }
+        QSlider::mousePressEvent(event);
+    }
+
+    void mouseMoveEvent(QMouseEvent *event) override
+    {
+        if (event->buttons().testFlag(Qt::LeftButton)) {
+            seekTo(event->position());
+        }
+        QSlider::mouseMoveEvent(event);
+    }
+
+private:
+    void seekTo(const QPointF &position)
+    {
+        QStyleOptionSlider option;
+        initStyleOption(&option);
+
+        const QRect grooveRect = style()->subControlRect(QStyle::CC_Slider, &option, QStyle::SC_SliderGroove, this);
+        const QRect handleRect = style()->subControlRect(QStyle::CC_Slider, &option, QStyle::SC_SliderHandle, this);
+
+        const bool isHorizontal = orientation() == Qt::Horizontal;
+        const int sliderMin = isHorizontal ? grooveRect.x() : grooveRect.y();
+        const int sliderMax = isHorizontal
+            ? grooveRect.right() - handleRect.width() + 1
+            : grooveRect.bottom() - handleRect.height() + 1;
+        const int pointer = isHorizontal ? qRound(position.x()) : qRound(position.y());
+        const int handleCenterOffset = isHorizontal ? handleRect.width() / 2 : handleRect.height() / 2;
+        const int boundedSliderPos = qBound(sliderMin, pointer - handleCenterOffset, sliderMax);
+
+        const int span = qMax(1, sliderMax - sliderMin);
+        const int value = QStyle::sliderValueFromPosition(
+            minimum(),
+            maximum(),
+            boundedSliderPos - sliderMin,
+            span,
+            option.upsideDown);
+        setValue(value);
+    }
 };
 
 namespace {
@@ -550,7 +601,7 @@ void ChromackPanel::buildUi()
     svPicker_ = new SaturationValuePicker(pickerTopFrame_);
     svPicker_->setObjectName(QStringLiteral("svPicker"));
 
-    hueSlider_ = new QSlider(Qt::Vertical, pickerTopFrame_);
+    hueSlider_ = new SeekOnClickSlider(Qt::Vertical, pickerTopFrame_);
     hueSlider_->setObjectName(QStringLiteral("hueSlider"));
     hueSlider_->setRange(0, 359);
     hueSlider_->setValue(120);
@@ -586,7 +637,7 @@ void ChromackPanel::buildUi()
     opacityLabel_ = new QLabel(QStringLiteral("Opacity"), opacityRow_);
     opacityLabel_->setObjectName(QStringLiteral("rowLabel"));
 
-    opacitySlider_ = new QSlider(Qt::Horizontal, opacityRow_);
+    opacitySlider_ = new SeekOnClickSlider(Qt::Horizontal, opacityRow_);
     opacitySlider_->setObjectName(QStringLiteral("opacitySlider"));
     opacitySlider_->setRange(0, 255);
     opacitySlider_->setValue(255);
