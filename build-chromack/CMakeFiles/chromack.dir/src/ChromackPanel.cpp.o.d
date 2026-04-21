@@ -448,6 +448,7 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: \
  /usr/include/qt6/QtWidgets/qtabwidget.h \
  /usr/include/qt6/QtWidgets/qrubberband.h \
  /usr/include/qt6/QtCore/qabstractitemmodel.h \
+ /usr/include/qt6/QtWidgets/QTabBar /usr/include/qt6/QtWidgets/QTabWidget \
  /usr/include/qt6/QtCore/QTextStream /usr/include/qt6/QtCore/QTimer \
  /usr/include/qt6/QtCore/qtimer.h \
  /usr/include/qt6/QtCore/QVariantAnimation \

@@ -46,6 +46,15 @@
     --panel-backdrop-bg: var(--color-panel-backdrop);
     --picker-backdrop-bg: var(--color-picker-backdrop);
 
+    --border-color: var(--control-border-color);
+    --text-color: var(--text-main);
+    --text-muted-color: var(--text-muted);
+    --input-bg: var(--panel-bg);
+    --tab-bg: var(--color-tab-bg);
+    --tab-active-bg: var(--color-tab-active-bg);
+    --tab-text-color: var(--color-tab-text);
+    --tab-active-text-color: var(--color-tab-active-text);
+
     --text-main: var(--color-text);
     --text-muted: var(--color-muted);
 
@@ -94,13 +103,70 @@ QPushButton#closeButton {
 
 QScrollArea#pickerScrollArea {
     background: var(--content-backdrop-bg);
-    border-radius: var(--content-radius);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QTabWidget#panelTabs {
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs::tab-bar {
+    alignment: left;
+    top: 2px;
+}
+
+QTabWidget#panelTabs QTabBar {
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs QTabBar::base {
+    border: none;
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs::pane {
+    border: none;
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QTabWidget#panelTabs QTabBar::tab {
+    min-height: 30px;
+    padding: 0 12px;
+    margin-bottom: -1px;
+    border: none;
+    border-top-left-radius: var(--input-radius);
+    border-top-right-radius: var(--input-radius);
+    background: var(--tab-bg, var(--panel-bg));
+    color: var(--tab-text-color, var(--text-muted-color));
+}
+
+QTabWidget#panelTabs QTabBar::tab:selected {
+    background: var(--tab-active-bg, var(--content-bg));
+    color: var(--tab-active-text-color, var(--text-color));
 }
 
 QWidget#pickerViewport,
 QWidget#pickerContainer {
     background: var(--content-bg);
-    border-radius: var(--content-radius);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QWidget#paletteTab {
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
 }
 
 QFrame#pickerTopFrame {
@@ -203,11 +269,44 @@ QFrame#opacityPreview {
     border: var(--control-border-width) solid var(--control-border-color);
 }
 
-QLineEdit#hexInput {
+QLineEdit#hexInput,
+QLineEdit#rgbaInput,
+QLineEdit#paletteInput,
+QLineEdit#paletteValueInput {
     min-height: var(--input-height);
-    border: var(--control-border-width) solid var(--control-border-color);
+    border: var(--control-border-width) solid var(--border-color);
     border-radius: var(--input-radius);
     padding: 0 10px;
-    color: var(--text-main);
-    background: var(--panel-bg);
+    color: var(--text-color);
+    background: var(--input-bg);
+}
+
+QPushButton#inlineCopyButton,
+QPushButton#paletteGenerateButton {
+    min-width: var(--input-height);
+    min-height: var(--input-height);
+    border-radius: var(--input-radius);
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 0 10px;
+}
+
+QPushButton#inlineCopyButton {
+    max-width: var(--input-height);
+    max-height: var(--input-height);
+    padding: 0;
+}
+
+QPushButton#inlineCopyButton:hover,
+QPushButton#paletteGenerateButton:hover {
+    border-color: var(--text-color);
+}
+
+QFrame#paletteSwatch {
+    min-width: var(--preview-width);
+    min-height: var(--preview-height);
+    max-height: var(--preview-height);
+    border-radius: var(--preview-radius);
+    border: var(--control-border-width) solid var(--control-border-color);
 }

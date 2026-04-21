@@ -133,6 +133,10 @@ QString defaultColorsContents()
         "    --color-panel-backdrop: transparent;\n"
         "    --color-picker-backdrop: var(--color-surface);\n"
         "    --color-content-backdrop: var(--color-surface-alt);\n"
+        "    --color-tab-bg: var(--color-surface);\n"
+        "    --color-tab-active-bg: var(--color-surface-alt);\n"
+        "    --color-tab-text: var(--color-muted);\n"
+        "    --color-tab-active-text: var(--color-text);\n"
         "    --color-border: #374151;\n"
         "    --color-text: #f3f4f6;\n"
         "    --color-muted: #9ca3af;\n"
@@ -247,6 +251,15 @@ QString defaultStyleContents()
     --panel-backdrop-bg: var(--color-panel-backdrop);
     --picker-backdrop-bg: var(--color-picker-backdrop);
 
+    --border-color: var(--control-border-color);
+    --text-color: var(--text-main);
+    --text-muted-color: var(--text-muted);
+    --input-bg: var(--panel-bg);
+    --tab-bg: var(--color-tab-bg);
+    --tab-active-bg: var(--color-tab-active-bg);
+    --tab-text-color: var(--color-tab-text);
+    --tab-active-text-color: var(--color-tab-active-text);
+
     --text-main: var(--color-text);
     --text-muted: var(--color-muted);
 
@@ -295,13 +308,70 @@ QPushButton#closeButton {
 
 QScrollArea#pickerScrollArea {
     background: var(--content-backdrop-bg);
-    border-radius: var(--content-radius);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QTabWidget#panelTabs {
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs::tab-bar {
+    alignment: left;
+    top: 2px;
+}
+
+QTabWidget#panelTabs QTabBar {
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs QTabBar::base {
+    border: none;
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs::pane {
+    border: none;
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QTabWidget#panelTabs QTabBar::tab {
+    min-height: 30px;
+    padding: 0 12px;
+    margin-bottom: -1px;
+    border: none;
+    border-top-left-radius: var(--input-radius);
+    border-top-right-radius: var(--input-radius);
+    background: var(--tab-bg, var(--panel-bg));
+    color: var(--tab-text-color, var(--text-muted-color));
+}
+
+QTabWidget#panelTabs QTabBar::tab:selected {
+    background: var(--tab-active-bg, var(--content-bg));
+    color: var(--tab-active-text-color, var(--text-color));
 }
 
 QWidget#pickerViewport,
 QWidget#pickerContainer {
     background: var(--content-bg);
-    border-radius: var(--content-radius);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QWidget#paletteTab {
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
 }
 
 QFrame#pickerTopFrame {
@@ -405,13 +475,15 @@ QFrame#opacityPreview {
 }
 
 QLineEdit#hexInput,
-QLineEdit#rgbaInput {
+QLineEdit#rgbaInput,
+QLineEdit#paletteInput,
+QLineEdit#paletteValueInput {
     min-height: var(--input-height);
-    border: var(--control-border-width) solid var(--control-border-color);
+    border: var(--control-border-width) solid var(--border-color);
     border-radius: var(--input-radius);
     padding: 0 10px;
-    color: var(--text-main);
-    background: var(--panel-bg);
+    color: var(--text-color);
+    background: var(--input-bg);
 }
 
 QPushButton#inlineCopyButton {
@@ -420,14 +492,35 @@ QPushButton#inlineCopyButton {
     min-height: var(--input-height);
     max-height: var(--input-height);
     border-radius: var(--input-radius);
-    border: var(--control-border-width) solid var(--control-border-color);
-    background: var(--panel-bg);
-    color: var(--text-main);
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
     padding: 0;
 }
 
 QPushButton#inlineCopyButton:hover {
-    border-color: var(--text-main);
+    border-color: var(--text-color);
+}
+
+QPushButton#paletteGenerateButton {
+    min-height: var(--input-height);
+    border-radius: var(--input-radius);
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 0 10px;
+}
+
+QPushButton#paletteGenerateButton:hover {
+    border-color: var(--text-color);
+}
+
+QFrame#paletteSwatch {
+    min-width: var(--preview-width);
+    min-height: var(--preview-height);
+    max-height: var(--preview-height);
+    border-radius: var(--preview-radius);
+    border: var(--control-border-width) solid var(--control-border-color);
 }
 
 )");
@@ -582,6 +675,210 @@ QString stripVariableDeclarations(const QString &text)
         QStringLiteral(R"((^|[\n\r])[\t ]*--[A-Za-z0-9_-]+\s*:\s*[^;{}]+;[\t ]*)"));
     output.replace(declarationPattern, QStringLiteral("\\1"));
     return output;
+}
+
+void appendIfMissing(QString *style, const QString &marker, const QString &block)
+{
+    if (style->contains(marker)) {
+        return;
+    }
+    if (!style->endsWith(QLatin1Char('\n'))) {
+        *style += QLatin1Char('\n');
+    }
+    *style += block;
+    if (!style->endsWith(QLatin1Char('\n'))) {
+        *style += QLatin1Char('\n');
+    }
+}
+
+QString ensurePaletteAndTabStyle(QString style)
+{
+    appendIfMissing(
+        &style,
+        QStringLiteral("QTabWidget#panelTabs::pane"),
+        QStringLiteral(R"(
+QTabWidget#panelTabs::pane {
+    border: none;
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QTabWidget#panelTabs {
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs::tab-bar {
+    alignment: left;
+    top: 2px;
+}
+
+QTabWidget#panelTabs QTabBar {
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs QTabBar::base {
+    border: none;
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs QTabBar::tab {
+    min-height: 30px;
+    padding: 0 12px;
+    margin-bottom: -1px;
+    border: none;
+    border-top-left-radius: var(--input-radius);
+    border-top-right-radius: var(--input-radius);
+    background: var(--tab-bg, var(--panel-bg));
+    color: var(--tab-text-color, var(--text-muted-color));
+}
+
+QTabWidget#panelTabs QTabBar::tab:selected {
+    background: var(--tab-active-bg, var(--content-bg));
+    color: var(--tab-active-text-color, var(--text-color));
+}
+
+QWidget#paletteTab {
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QWidget#pickerViewport,
+QWidget#pickerContainer {
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QScrollArea#pickerScrollArea {
+    background: var(--content-backdrop-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+)")
+    );
+
+    appendIfMissing(
+        &style,
+        QStringLiteral("QLineEdit#paletteInput"),
+        QStringLiteral(R"(
+QLineEdit#paletteInput,
+QLineEdit#paletteValueInput {
+    min-height: var(--input-height);
+    border: var(--control-border-width) solid var(--border-color);
+    border-radius: var(--input-radius);
+    padding: 0 10px;
+    color: var(--text-color);
+    background: var(--input-bg);
+}
+)")
+    );
+
+    appendIfMissing(
+        &style,
+        QStringLiteral("QPushButton#paletteGenerateButton"),
+        QStringLiteral(R"(
+QPushButton#paletteGenerateButton {
+    min-height: var(--input-height);
+    border-radius: var(--input-radius);
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 0 10px;
+}
+
+QPushButton#paletteGenerateButton:hover {
+    border-color: var(--text-color);
+}
+)")
+    );
+
+    appendIfMissing(
+        &style,
+        QStringLiteral("QTabWidget#panelTabs::tab-bar"),
+        QStringLiteral(R"(
+QTabWidget#panelTabs::tab-bar {
+    alignment: left;
+    top: 2px;
+}
+)")
+    );
+
+    appendIfMissing(
+        &style,
+        QStringLiteral("QWidget#paletteTab"),
+        QStringLiteral(R"(
+QWidget#paletteTab {
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+)")
+    );
+
+    appendIfMissing(
+        &style,
+        QStringLiteral("chromack-tabs-layout-v5"),
+        QStringLiteral(R"(
+/* chromack-tabs-layout-v5 */
+QTabWidget#panelTabs::tab-bar {
+    alignment: left;
+    top: 2px;
+}
+
+QTabWidget#panelTabs QTabBar::tab {
+    margin-bottom: -1px;
+    border: none;
+    background: var(--tab-bg, var(--panel-bg));
+    color: var(--tab-text-color, var(--text-muted-color));
+}
+
+QTabWidget#panelTabs QTabBar::tab:selected {
+    background: var(--tab-active-bg, var(--content-bg));
+    color: var(--tab-active-text-color, var(--text-color));
+}
+
+QTabWidget#panelTabs::pane {
+    border: none;
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QWidget#pickerViewport,
+QWidget#pickerContainer,
+QWidget#paletteTab {
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QScrollArea#pickerScrollArea {
+    background: var(--content-backdrop-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+)")
+    );
+
+    return style;
 }
 
 void copyIfMissing(const QString &from, const QString &to)
@@ -795,6 +1092,7 @@ void ChromackConfigLoader::reload()
 
     styleVariables_ = extractVariables(resolvedText);
     QString flatStyle = stripVariableDeclarations(resolvedText);
+    flatStyle = ensurePaletteAndTabStyle(flatStyle);
     styleSheet_ = substituteVariables(flatStyle, styleVariables_);
 
     emit configChanged(config_);

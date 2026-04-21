@@ -2817,6 +2817,8 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: /home/dxle/builds/chromack/src/
   /usr/include/qt6/QtWidgets/QSlider \
   /usr/include/qt6/QtWidgets/QStyle \
   /usr/include/qt6/QtWidgets/QStyleOptionSlider \
+  /usr/include/qt6/QtWidgets/QTabBar \
+  /usr/include/qt6/QtWidgets/QTabWidget \
   /usr/include/qt6/QtWidgets/QVBoxLayout \
   /usr/include/qt6/QtWidgets/QWidget \
   /usr/include/qt6/QtWidgets/qabstractbutton.h \
@@ -3562,8 +3564,6 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o:
 
 /usr/lib/libc_nonshared.a:
 
-/usr/lib/libc.so.6:
-
 /usr/lib/libbz2.so.1.0:
 
 /usr/lib/libbrotlidec.so.1:
@@ -3573,6 +3573,8 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o:
 /usr/lib/libXdmcp.so.6:
 
 /usr/lib/libXau.so.6:
+
+/usr/lib/libX11.so.6:
 
 /usr/include/c++/15.2.1/bits/locale_facets_nonio.tcc:
 
@@ -3603,6 +3605,8 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o:
 /usr/lib/cmake/Qt6/QtPublicSbomLicenseHelpers.cmake:
 
 /usr/lib/cmake/Qt6/QtPublicSbomHelpers.cmake:
+
+/usr/include/qt6/QtWidgets/QTabWidget:
 
 /usr/include/qt6/QtDBus/qdbuspendingreply.h:
 
@@ -4242,8 +4246,6 @@ CMakeFiles/chromack.dir/src/ChromackConfig.cpp.o:
 
 /usr/lib/cmake/Qt6Gui/Qt6QTuioTouchPluginConfig.cmake:
 
-/usr/lib/libX11.so.6:
-
 /usr/include/wchar.h:
 
 /usr/include/bits/wordsize.h:
@@ -4777,6 +4779,10 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 /usr/lib/libc.so:
 
 /usr/include/qt6/QtGui/qpointingdevice.h:
+
+/usr/lib/libc.so.6:
+
+/usr/include/qt6/QtWidgets/QTabBar:
 
 /usr/include/bits/timex.h:
 

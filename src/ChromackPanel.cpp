@@ -26,6 +26,8 @@
 #include <QStandardPaths>
 #include <QStyle>
 #include <QStyleOptionSlider>
+#include <QTabBar>
+#include <QTabWidget>
 #include <QTextStream>
 #include <QTimer>
 #include <QVariantAnimation>
@@ -301,6 +303,30 @@ QColor parseColorValue(const QString &value)
     return parsed;
 }
 
+QColor parseColorFromPastelOutput(QString output)
+{
+    static const QRegularExpression ansiSequence(QStringLiteral(R"(\x1B\[[0-9;]*[A-Za-z])"));
+    static const QRegularExpression tokenPattern(
+        QStringLiteral(R"((#[0-9A-Fa-f]{6,8}|rgba?\([^\)]+\)))"));
+
+    output.remove(ansiSequence);
+    QRegularExpressionMatchIterator tokenIt = tokenPattern.globalMatch(output);
+    QColor parsed;
+    while (tokenIt.hasNext()) {
+        const QString token = tokenIt.next().captured(1).trimmed();
+        QColor candidate = parseColorValue(token);
+        if (candidate.isValid()) {
+            parsed = candidate;
+        }
+    }
+
+    if (parsed.isValid()) {
+        return parsed;
+    }
+
+    return parseColorValue(output.trimmed());
+}
+
 QString toCssColor(const QColor &color)
 {
     if (!color.isValid()) {
@@ -546,7 +572,7 @@ void ChromackPanel::buildUi()
     panelRoot_->setObjectName(QStringLiteral("panelRoot"));
 
     panelLayout_ = new QVBoxLayout(panelRoot_);
-    panelLayout_->setContentsMargins(14, 14, 14, 14);
+    panelLayout_->setContentsMargins(14, 20, 14, 14);
     panelLayout_->setSpacing(10);
 
     headerBar_ = new QFrame(panelRoot_);
@@ -577,8 +603,31 @@ void ChromackPanel::buildUi()
     headerLayout_->addWidget(closeButton_);
 
     panelLayout_->addWidget(headerBar_);
+    panelLayout_->addSpacing(4);
 
-    scrollArea_ = new QScrollArea(panelRoot_);
+    tabWidget_ = new QTabWidget(panelRoot_);
+    tabWidget_->setObjectName(QStringLiteral("panelTabs"));
+    tabWidget_->setDocumentMode(true);
+    if (QTabBar *tabBar = tabWidget_->tabBar()) {
+        tabBar->setDrawBase(false);
+        tabBar->setExpanding(true);
+        tabBar->setUsesScrollButtons(false);
+    }
+
+    pickerTab_ = new QWidget(tabWidget_);
+    pickerTab_->setObjectName(QStringLiteral("pickerTab"));
+    auto *pickerTabLayout = new QVBoxLayout(pickerTab_);
+    pickerTabLayout->setContentsMargins(0, 0, 0, 0);
+    pickerTabLayout->setSpacing(0);
+
+    paletteTab_ = new QWidget(tabWidget_);
+    paletteTab_->setObjectName(QStringLiteral("paletteTab"));
+    paletteLayout_ = new QVBoxLayout(paletteTab_);
+    paletteLayout_->setContentsMargins(10, 10, 10, 10);
+    paletteLayout_->setSpacing(8);
+    paletteLayout_->setAlignment(Qt::AlignTop);
+
+    scrollArea_ = new QScrollArea(pickerTab_);
     scrollArea_->setObjectName(QStringLiteral("pickerScrollArea"));
     scrollArea_->setWidgetResizable(true);
     scrollArea_->setFrameShape(QFrame::NoFrame);
@@ -701,8 +750,52 @@ void ChromackPanel::buildUi()
 
     scrollArea_->setWidget(pickerContainer_);
     scrollArea_->viewport()->setObjectName(QStringLiteral("pickerViewport"));
+    pickerTabLayout->addWidget(scrollArea_);
 
-    panelLayout_->addWidget(scrollArea_, 1);
+    paletteInputRow_ = new QFrame(paletteTab_);
+    paletteInputRow_->setObjectName(QStringLiteral("paletteInputRow"));
+    paletteInputLayout_ = new QHBoxLayout(paletteInputRow_);
+    paletteInputLayout_->setContentsMargins(0, 0, 0, 0);
+    paletteInputLayout_->setSpacing(8);
+
+    paletteInputLabel_ = new QLabel(QStringLiteral("Base"), paletteInputRow_);
+    paletteInputLabel_->setObjectName(QStringLiteral("rowLabel"));
+
+    paletteInput_ = new QLineEdit(paletteInputRow_);
+    paletteInput_->setObjectName(QStringLiteral("paletteInput"));
+    paletteInput_->setPlaceholderText(QStringLiteral("#5f6b7b or rgba(95, 107, 123, 1)"));
+
+    paletteGenerateButton_ = new QPushButton(QStringLiteral("Generate"), paletteInputRow_);
+    paletteGenerateButton_->setObjectName(QStringLiteral("paletteGenerateButton"));
+
+    paletteInputLayout_->addWidget(paletteInputLabel_);
+    paletteInputLayout_->addWidget(paletteInput_, 1);
+    paletteInputLayout_->addWidget(paletteGenerateButton_);
+
+    paletteStatusLabel_ = new QLabel(
+        QStringLiteral("Generate a pastel palette from a hex or rgba value"),
+        paletteTab_);
+    paletteStatusLabel_->setObjectName(QStringLiteral("headerSubtitle"));
+    paletteStatusLabel_->setWordWrap(true);
+
+    paletteGridFrame_ = new QFrame(paletteTab_);
+    paletteGridFrame_->setObjectName(QStringLiteral("paletteGridFrame"));
+    paletteGridLayout_ = new QGridLayout(paletteGridFrame_);
+    paletteGridLayout_->setContentsMargins(0, 0, 0, 0);
+    paletteGridLayout_->setHorizontalSpacing(8);
+    paletteGridLayout_->setVerticalSpacing(6);
+
+    buildPaletteRows();
+
+    paletteLayout_->addWidget(paletteInputRow_);
+    paletteLayout_->addWidget(paletteStatusLabel_);
+    paletteLayout_->addWidget(paletteGridFrame_);
+    paletteLayout_->addStretch(1);
+
+    tabWidget_->addTab(pickerTab_, QStringLiteral("Color Picker"));
+    tabWidget_->addTab(paletteTab_, QStringLiteral("Palette Generator"));
+
+    panelLayout_->addWidget(tabWidget_, 1);
 
     connect(closeButton_, &QPushButton::clicked, this, [this]() {
         writeColors();
@@ -711,6 +804,8 @@ void ChromackPanel::buildUi()
     });
     connect(copyHexButton_, &QPushButton::clicked, this, &ChromackPanel::copyHexValue);
     connect(copyRgbaButton_, &QPushButton::clicked, this, &ChromackPanel::copyRgbaValue);
+    connect(paletteGenerateButton_, &QPushButton::clicked, this, &ChromackPanel::generatePastelPalette);
+    connect(paletteInput_, &QLineEdit::returnPressed, this, &ChromackPanel::generatePastelPalette);
 
     connect(hueSlider_, &QSlider::valueChanged, this, [this](int hue) {
         if (syncingUi_ || activeColorKey_.isEmpty()) {
@@ -871,6 +966,66 @@ void ChromackPanel::buildColorRows()
     setActiveColorKey(activeColorKey_);
 }
 
+void ChromackPanel::buildPaletteRows()
+{
+    while (QLayoutItem *item = paletteGridLayout_->takeAt(0)) {
+        if (item->widget()) {
+            item->widget()->deleteLater();
+        }
+        delete item;
+    }
+
+    paletteRows_.clear();
+
+    const QStringList rowNames = {
+        QStringLiteral("Base"),
+        QStringLiteral("Surface"),
+        QStringLiteral("Background"),
+        QStringLiteral("Muted"),
+        QStringLiteral("Accent"),
+        QStringLiteral("Accent Alt"),
+        QStringLiteral("Highlight")
+    };
+
+    for (int rowIndex = 0; rowIndex < rowNames.size(); ++rowIndex) {
+        PaletteRow row;
+        row.nameLabel = new QLabel(rowNames.at(rowIndex), paletteGridFrame_);
+        row.nameLabel->setObjectName(QStringLiteral("rowLabel"));
+
+        row.swatch = new QFrame(paletteGridFrame_);
+        row.swatch->setObjectName(QStringLiteral("paletteSwatch"));
+
+        row.valueInput = new QLineEdit(paletteGridFrame_);
+        row.valueInput->setObjectName(QStringLiteral("paletteValueInput"));
+        row.valueInput->setReadOnly(true);
+
+        row.copyButton = new QPushButton(paletteGridFrame_);
+        row.copyButton->setObjectName(QStringLiteral("inlineCopyButton"));
+        row.copyButton->setIcon(copyIconFor(row.copyButton));
+        row.copyButton->setIconSize(QSize(16, 16));
+        row.copyButton->setToolTip(QStringLiteral("Copy color"));
+        row.copyButton->setEnabled(false);
+
+        connect(row.copyButton, &QPushButton::clicked, this, [this, rowIndex]() {
+            if (rowIndex < 0 || rowIndex >= paletteRows_.size()) {
+                return;
+            }
+            const QString value = paletteRows_.at(rowIndex).valueInput->text().trimmed();
+            copyTextValue(value);
+        });
+
+        paletteGridLayout_->addWidget(row.nameLabel, rowIndex, 0);
+        paletteGridLayout_->addWidget(row.swatch, rowIndex, 1);
+        paletteGridLayout_->addWidget(row.valueInput, rowIndex, 2);
+        paletteGridLayout_->addWidget(row.copyButton, rowIndex, 3);
+        paletteRows_.append(row);
+    }
+
+    if (paletteGridLayout_) {
+        paletteGridLayout_->setColumnStretch(2, 1);
+    }
+}
+
 void ChromackPanel::refreshMaterialButtons()
 {
     for (ColorRow &row : colorRows_) {
@@ -945,6 +1100,9 @@ void ChromackPanel::setActiveColorKey(const QString &key)
     svPicker_->setSaturationValue(saturation, color.valueF());
     hexInput_->setText(color.name(QColor::HexRgb).toLower());
     rgbaInput_->setText(toRgbaColor(color));
+    if (paletteInput_ && !paletteInput_->hasFocus()) {
+        paletteInput_->setText(hexInput_->text());
+    }
 
     syncingUi_ = false;
 
@@ -998,6 +1156,9 @@ void ChromackPanel::setActiveColor(const QColor &color, bool pushRecent)
     svPicker_->setSaturationValue(saturation, color.valueF());
     hexInput_->setText(color.name(QColor::HexRgb).toLower());
     rgbaInput_->setText(toRgbaColor(color));
+    if (paletteInput_ && !paletteInput_->hasFocus()) {
+        paletteInput_->setText(hexInput_->text());
+    }
 
     syncingUi_ = false;
 
@@ -1045,6 +1206,106 @@ void ChromackPanel::copyTextValue(const QString &value)
     }
 
     notifyCopiedColor(value, copiedColor);
+}
+
+QColor ChromackPanel::runPastelTransform(const QStringList &args, bool *ok) const
+{
+    if (ok) {
+        *ok = false;
+    }
+
+    if (QStandardPaths::findExecutable(QStringLiteral("pastel")).isEmpty()) {
+        return QColor();
+    }
+
+    QProcess process;
+    process.start(QStringLiteral("pastel"), args);
+    if (!process.waitForStarted(500) || !process.waitForFinished(1200)) {
+        process.kill();
+        return QColor();
+    }
+    if (process.exitStatus() != QProcess::NormalExit || process.exitCode() != 0) {
+        return QColor();
+    }
+
+    const QString output = QString::fromUtf8(process.readAllStandardOutput())
+                               + QString::fromUtf8(process.readAllStandardError());
+    const QColor parsed = parseColorFromPastelOutput(output);
+    if (ok && parsed.isValid()) {
+        *ok = true;
+    }
+    return parsed;
+}
+
+void ChromackPanel::generatePastelPalette()
+{
+    if (!paletteInput_ || !paletteStatusLabel_ || paletteRows_.isEmpty()) {
+        return;
+    }
+
+    const QString rawInput = paletteInput_->text().trimmed();
+    const QColor baseInput = parseColorValue(rawInput);
+    if (!baseInput.isValid()) {
+        paletteStatusLabel_->setText(QStringLiteral("Invalid color. Use hex or rgba."));
+        return;
+    }
+
+    if (QStandardPaths::findExecutable(QStringLiteral("pastel")).isEmpty()) {
+        paletteStatusLabel_->setText(QStringLiteral("Unable to generate palette: `pastel` is not in PATH."));
+        return;
+    }
+
+    const QString baseText = toCssColor(baseInput);
+    bool allSucceeded = true;
+    auto run = [this, &allSucceeded](const QStringList &args, const QColor &fallback) {
+        bool ok = false;
+        const QColor transformed = runPastelTransform(args, &ok);
+        if (!ok || !transformed.isValid()) {
+            allSucceeded = false;
+            return fallback;
+        }
+        return transformed;
+    };
+
+    QColor base = baseInput;
+    QColor surface = run({QStringLiteral("darken"), QStringLiteral("0.2"), baseText}, baseInput.darker(115));
+    QColor background = run({QStringLiteral("darken"), QStringLiteral("0.4"), baseText}, baseInput.darker(140));
+    QColor muted = run({QStringLiteral("desaturate"), QStringLiteral("0.35"), baseText}, baseInput);
+    QColor highlight = run({QStringLiteral("lighten"), QStringLiteral("0.35"), baseText}, baseInput.lighter(135));
+
+    QColor accentRotated = run({QStringLiteral("rotate"), QStringLiteral("25"), baseText}, baseInput);
+    QColor accent = run(
+        {QStringLiteral("saturate"), QStringLiteral("0.45"), toCssColor(accentRotated)},
+        accentRotated);
+
+    QColor accentAltRotated = run({QStringLiteral("rotate"), QStringLiteral("-25"), baseText}, baseInput);
+    QColor accentAlt = run(
+        {QStringLiteral("saturate"), QStringLiteral("0.45"), toCssColor(accentAltRotated)},
+        accentAltRotated);
+
+    const QList<QColor> colors = {
+        base,
+        surface,
+        background,
+        muted,
+        accent,
+        accentAlt,
+        highlight
+    };
+
+    for (int i = 0; i < paletteRows_.size() && i < colors.size(); ++i) {
+        const QColor color = colors.at(i);
+        const QString value = toCssColor(color);
+        paletteRows_[i].swatch->setStyleSheet(QStringLiteral("background:%1;").arg(value));
+        paletteRows_[i].valueInput->setText(value);
+        paletteRows_[i].copyButton->setEnabled(true);
+    }
+
+    if (allSucceeded) {
+        paletteStatusLabel_->setText(QStringLiteral("Generated pastel palette from %1").arg(baseText));
+    } else {
+        paletteStatusLabel_->setText(QStringLiteral("Generated palette with fallbacks (some pastel commands failed)"));
+    }
 }
 
 void ChromackPanel::applyConfig(const ChromackConfig &config)

@@ -2822,6 +2822,8 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o
  /usr/include/qt6/QtWidgets/QSlider
  /usr/include/qt6/QtWidgets/QStyle
  /usr/include/qt6/QtWidgets/QStyleOptionSlider
+ /usr/include/qt6/QtWidgets/QTabBar
+ /usr/include/qt6/QtWidgets/QTabWidget
  /usr/include/qt6/QtWidgets/QVBoxLayout
  /usr/include/qt6/QtWidgets/QWidget
  /usr/include/qt6/QtWidgets/qabstractbutton.h

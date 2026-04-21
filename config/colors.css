@@ -7,6 +7,10 @@
     --color-panel-backdrop: transparent;
     --color-picker-backdrop: var(--color-surface);
     --color-content-backdrop: var(--color-surface-alt);
+    --color-tab-bg: var(--color-surface);
+    --color-tab-active-bg: var(--color-surface-alt);
+    --color-tab-text: var(--color-muted);
+    --color-tab-active-text: var(--color-text);
     --color-border: #374151;
     --color-text: #f3f4f6;
     --color-muted: #9ca3af;

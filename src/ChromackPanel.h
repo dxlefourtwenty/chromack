@@ -18,6 +18,7 @@ class QPropertyAnimation;
 class QScreen;
 class QScrollArea;
 class QSlider;
+class QTabWidget;
 class QVBoxLayout;
 class QVariantAnimation;
 class SaturationValuePicker;
@@ -57,6 +58,7 @@ private:
 
     void buildUi();
     void buildColorRows();
+    void buildPaletteRows();
     void refreshMaterialButtons();
     void refreshRecentButtons();
     void setActiveColorKey(const QString &key);
@@ -70,6 +72,8 @@ private:
     void pushRecentColor(const QColor &color, bool persist);
     void loadRecentColors();
     void writeRecentColors();
+    void generatePastelPalette();
+    QColor runPastelTransform(const QStringList &args, bool *ok) const;
     void updatePanelGeometry(bool animated);
     QPoint openPosition() const;
     QPoint closedPosition() const;
@@ -107,8 +111,12 @@ private:
     QPushButton *closeButton_ = nullptr;
 
     QScrollArea *scrollArea_ = nullptr;
+    QTabWidget *tabWidget_ = nullptr;
+    QWidget *pickerTab_ = nullptr;
+    QWidget *paletteTab_ = nullptr;
     QWidget *pickerContainer_ = nullptr;
     QVBoxLayout *pickerLayout_ = nullptr;
+    QVBoxLayout *paletteLayout_ = nullptr;
 
     QFrame *pickerTopFrame_ = nullptr;
     QHBoxLayout *pickerTopLayout_ = nullptr;
@@ -138,9 +146,26 @@ private:
     QPushButton *copyHexButton_ = nullptr;
     QPushButton *copyRgbaButton_ = nullptr;
 
+    QFrame *paletteInputRow_ = nullptr;
+    QHBoxLayout *paletteInputLayout_ = nullptr;
+    QLabel *paletteInputLabel_ = nullptr;
+    QLineEdit *paletteInput_ = nullptr;
+    QPushButton *paletteGenerateButton_ = nullptr;
+    QLabel *paletteStatusLabel_ = nullptr;
+    QFrame *paletteGridFrame_ = nullptr;
+    QGridLayout *paletteGridLayout_ = nullptr;
+
+    struct PaletteRow {
+        QLabel *nameLabel = nullptr;
+        QFrame *swatch = nullptr;
+        QLineEdit *valueInput = nullptr;
+        QPushButton *copyButton = nullptr;
+    };
+
     QList<ColorRow> colorRows_;
     QList<QPushButton *> recentButtons_;
     QList<QColor> recentColors_;
+    QList<PaletteRow> paletteRows_;
 
     QString activeColorKey_;
     QPointer<QVariantAnimation> slideAnimation_;
