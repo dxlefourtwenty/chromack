@@ -52,7 +52,9 @@ template <> constexpr inline auto ChromackControl::qt_create_metaobjectdata<qt_m
         "Open",
         "Close",
         "Toggle",
-        "SetColor"
+        "SetColor",
+        "ActiveColor",
+        "UpdateActiveColor"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -78,6 +80,12 @@ template <> constexpr inline auto ChromackControl::qt_create_metaobjectdata<qt_m
         QtMocHelpers::SlotData<void()>(13, 4, QMC::AccessPublic, QMetaType::Void),
         // Slot 'SetColor'
         QtMocHelpers::SlotData<void(const QString &)>(14, 4, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::QString, 9 },
+        }}),
+        // Slot 'ActiveColor'
+        QtMocHelpers::SlotData<QString() const>(15, 4, QMC::AccessPublic, QMetaType::QString),
+        // Slot 'UpdateActiveColor'
+        QtMocHelpers::SlotData<void(const QString &)>(16, 4, QMC::AccessPublic, QMetaType::Void, {{
             { QMetaType::QString, 9 },
         }}),
     };
@@ -117,6 +125,9 @@ void ChromackControl::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         case 7: _t->Close(); break;
         case 8: _t->Toggle(); break;
         case 9: _t->SetColor((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 10: { QString _r = _t->ActiveColor();
+            if (_a[0]) *reinterpret_cast<QString*>(_a[0]) = std::move(_r); }  break;
+        case 11: _t->UpdateActiveColor((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
         default: ;
         }
     }
@@ -153,14 +164,14 @@ int ChromackControl::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 10)
+        if (_id < 12)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 10;
+        _id -= 12;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 10)
+        if (_id < 12)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 10;
+        _id -= 12;
     }
     return _id;
 }

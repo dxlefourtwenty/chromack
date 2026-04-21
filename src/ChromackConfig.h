@@ -44,6 +44,7 @@ struct ChromackPathsConfig {
     QString materialCss = QStringLiteral("~/.config/chromack/material.css");
     QString stateFile = QStringLiteral("$XDG_RUNTIME_DIR/chromack/panel.state");
     QString recentColorsFile = QStringLiteral("~/.cache/chromack/recent-colors.txt");
+    QString activeColorFile = QStringLiteral("~/.cache/chromack/active-color.txt");
 };
 
 struct ChromackConfig {

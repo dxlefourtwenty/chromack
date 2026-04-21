@@ -23,4 +23,9 @@ public slots:
     void Close();
     void Toggle();
     void SetColor(const QString &value);
+    QString ActiveColor() const;
+    void UpdateActiveColor(const QString &value);
+
+private:
+    QString activeColor_;
 };

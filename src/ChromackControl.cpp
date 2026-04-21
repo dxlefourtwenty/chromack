@@ -29,3 +29,13 @@ void ChromackControl::SetColor(const QString &value)
 {
     emit setColorRequested(value);
 }
+
+QString ChromackControl::ActiveColor() const
+{
+    return activeColor_;
+}
+
+void ChromackControl::UpdateActiveColor(const QString &value)
+{
+    activeColor_ = value.trimmed();
+}

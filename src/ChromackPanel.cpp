@@ -723,6 +723,9 @@ ChromackPanel::ChromackPanel(ChromackConfigLoader *configLoader, QWidget *parent
     buildColorRows();
     applyStyle(styleSheet_, styleVariables_);
     applyConfig(config_);
+    loadActiveColorCache();
+    activeColorCacheReady_ = true;
+    writeActiveColorCache();
 
     open_ = envWantsOpenByDefault(config_.panel.startOpen);
     updatePanelGeometry(false);
@@ -738,6 +741,11 @@ ChromackPanel::ChromackPanel(ChromackConfigLoader *configLoader, QWidget *parent
 }
 
 ChromackPanel::~ChromackPanel() = default;
+
+QString ChromackPanel::activeColorCss() const
+{
+    return toCssColor(activeColor());
+}
 
 void ChromackPanel::buildUi()
 {
@@ -1498,6 +1506,10 @@ void ChromackPanel::setActiveColorKey(const QString &key)
 
     updateColorPreview();
     refreshShadesRows();
+    if (activeColorCacheReady_) {
+        writeActiveColorCache();
+    }
+    emit activeColorChanged(toCssColor(color));
 }
 
 QColor ChromackPanel::colorForKey(const QString &key) const
@@ -1557,6 +1569,10 @@ void ChromackPanel::setActiveColor(const QColor &color, bool pushRecent)
     refreshShadesRows();
     refreshMaterialButtons();
     refreshRecentButtons();
+    if (activeColorCacheReady_) {
+        writeActiveColorCache();
+    }
+    emit activeColorChanged(toCssColor(color));
 }
 
 void ChromackPanel::updateColorPreview()
@@ -1852,13 +1868,65 @@ void ChromackPanel::writeRecentColors()
     }
 }
 
+void ChromackPanel::loadActiveColorCache()
+{
+    QFile file(activeColorFilePath());
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        return;
+    }
+
+    QTextStream stream(&file);
+    const QString cachedKey = stream.readLine().trimmed();
+    const QString cachedColor = stream.readLine().trimmed();
+
+    if (!cachedKey.isEmpty() && styleVariables_.contains(cachedKey)) {
+        setActiveColorKey(cachedKey);
+    }
+
+    const QColor parsed = parseColorValue(cachedColor);
+    if (parsed.isValid() && !activeColorKey_.isEmpty()) {
+        setActiveColor(parsed, false);
+    }
+}
+
+void ChromackPanel::writeActiveColorCache()
+{
+    if (activeColorKey_.isEmpty()) {
+        return;
+    }
+
+    const QString path = activeColorFilePath();
+    const QFileInfo info(path);
+    QDir().mkpath(info.absolutePath());
+
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        return;
+    }
+
+    QTextStream stream(&file);
+    stream << activeColorKey_ << '\n';
+    stream << toCssColor(activeColor()) << '\n';
+}
+
 void ChromackPanel::applyStyle(const QString &styleSheet, const QHash<QString, QString> &styleVariables)
 {
+    const QString previousActiveKey = activeColorKey_;
+    const QColor previousActiveColor = activeColor();
+
     styleSheet_ = styleSheet;
     styleVariables_ = styleVariables;
 
     setStyleSheet(styleSheet_);
     buildColorRows();
+
+    if (!previousActiveKey.isEmpty() && styleVariables_.contains(previousActiveKey)) {
+        setActiveColorKey(previousActiveKey);
+    }
+
+    if (previousActiveColor.isValid() && !activeColorKey_.isEmpty()) {
+        setActiveColor(previousActiveColor, false);
+    }
 }
 
 void ChromackPanel::reloadConfiguration()
@@ -2309,6 +2377,11 @@ QString ChromackPanel::stateFilePath() const
 QString ChromackPanel::recentColorsFilePath() const
 {
     return expandPath(config_.paths.recentColorsFile);
+}
+
+QString ChromackPanel::activeColorFilePath() const
+{
+    return expandPath(config_.paths.activeColorFile);
 }
 
 QString ChromackPanel::expandPath(QString value) const

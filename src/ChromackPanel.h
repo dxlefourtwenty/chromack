@@ -36,6 +36,7 @@ class ChromackPanel : public QWidget {
 public:
     explicit ChromackPanel(ChromackConfigLoader *configLoader, QWidget *parent = nullptr);
     ~ChromackPanel() override;
+    QString activeColorCss() const;
 
 public slots:
     void reloadConfiguration();
@@ -43,6 +44,9 @@ public slots:
     void closePanel();
     void togglePanel();
     void applyExternalColor(const QString &value);
+
+signals:
+    void activeColorChanged(const QString &value);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -77,6 +81,8 @@ private:
     void pushRecentColor(const QColor &color, bool persist);
     void loadRecentColors();
     void writeRecentColors();
+    void loadActiveColorCache();
+    void writeActiveColorCache();
     void applyPaletteInputToActiveColor();
     void generateTerminalPalette();
     void updatePaletteInputSwatch(const QColor &color);
@@ -99,6 +105,7 @@ private:
     QString materialFilePath() const;
     QString stateFilePath() const;
     QString recentColorsFilePath() const;
+    QString activeColorFilePath() const;
     QString expandPath(QString value) const;
     void writeStateFile(const QString &value);
 
@@ -193,6 +200,7 @@ private:
     QPointer<QPropertyAnimation> fadeAnimation_;
     int panelOffsetX_ = 0;
     bool syncingUi_ = false;
+    bool activeColorCacheReady_ = false;
 
     bool open_ = false;
 #if CHROMACK_HAS_LAYERSHELLQT

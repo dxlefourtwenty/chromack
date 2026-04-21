@@ -113,6 +113,31 @@ wait_for_chromack() {
     return 1
 }
 
+capture_active_color() {
+    local chromack_bin="$1"
+    local color=""
+
+    if is_chromack_running "$chromack_bin"; then
+        color="$("$chromack_bin" --active-color 2>/dev/null || true)"
+    fi
+
+    color="$(printf '%s\n' "$color" | /usr/bin/awk 'NR==1{gsub(/^[[:space:]]+|[[:space:]]+$/, ""); print; exit}')"
+    if [[ "$color" =~ ^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$ || "$color" =~ ^rgba?\( ]]; then
+        printf '%s\n' "$color"
+        return
+    fi
+
+    printf '\n'
+}
+
+restore_active_color() {
+    local chromack_bin="$1"
+    local color="$2"
+
+    [[ -n "$color" ]] || return 0
+    "$chromack_bin" --set-color "$color" >/dev/null 2>&1 || true
+}
+
 is_chromack_running() {
     local chromack_bin="$1"
     local pids=()
@@ -123,6 +148,7 @@ is_chromack_running() {
 main() {
     local dry_run=0
     local chromack_bin=""
+    local active_color=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -145,6 +171,7 @@ main() {
 
     if [[ "$dry_run" -eq 1 ]]; then
         printf 'binary=%s\n' "$chromack_bin"
+        printf 'preserve_active_color=yes\n'
         if is_chromack_running "$chromack_bin"; then
             printf 'action=reload\n'
         else
@@ -155,14 +182,19 @@ main() {
 
     [[ -x "$chromack_bin" ]] || return 1
 
+    active_color="$(capture_active_color "$chromack_bin")"
+
     if is_chromack_running "$chromack_bin"; then
         "$chromack_bin" --reload >/dev/null 2>&1
-        return $?
+        local reload_status=$?
+        restore_active_color "$chromack_bin" "$active_color"
+        return "$reload_status"
     fi
 
     write_state "closed"
     start_chromack "$chromack_bin"
     wait_for_chromack "$chromack_bin"
+    restore_active_color "$chromack_bin" "$active_color"
 }
 
 main "$@"
