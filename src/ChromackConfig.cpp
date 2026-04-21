@@ -519,9 +519,9 @@ QString resolveImports(const QString &styleText, const QString &baseDir, QSet<QS
         const QString importPath = match.captured(1).trimmed();
         const QString resolved = normalizePath(QDir(baseDir).absoluteFilePath(importPath));
         if (!visited->contains(resolved)) {
-            visited->insert(resolved);
             const QString importedText = readTextFile(resolved);
             if (!importedText.isEmpty()) {
+                visited->insert(resolved);
                 output += resolveImports(importedText, QFileInfo(resolved).absolutePath(), visited);
                 output += QLatin1Char('\n');
             }

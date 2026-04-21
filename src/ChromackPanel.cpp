@@ -297,7 +297,7 @@ bool isMaterialColorKey(const QString &key)
     return key.startsWith(QStringLiteral("--color-material-"));
 }
 
-QList<QPair<QString, QString>> extractNonColorVariables(const QString &text)
+QList<QPair<QString, QString>> extractVariables(const QString &text)
 {
     QList<QPair<QString, QString>> variables;
     static const QRegularExpression pattern(
@@ -309,9 +309,6 @@ QList<QPair<QString, QString>> extractNonColorVariables(const QString &text)
     while (it.hasNext()) {
         const QRegularExpressionMatch match = it.next();
         const QString key = match.captured(1).trimmed();
-        if (key.startsWith(QStringLiteral("--color-"))) {
-            continue;
-        }
         if (!valuesByKey.contains(key)) {
             keyOrder.append(key);
         }
@@ -1339,7 +1336,32 @@ void ChromackPanel::writeColors()
             existingText = QString::fromUtf8(file.readAll());
             file.close();
         }
-        const QList<QPair<QString, QString>> preservedVariables = extractNonColorVariables(existingText);
+        const QList<QPair<QString, QString>> existingVariables = extractVariables(existingText);
+        QHash<QString, QString> valuesByKey;
+        QStringList keyOrder;
+
+        for (const auto &entry : existingVariables) {
+            const QString key = entry.first;
+            const bool isColor = key.startsWith(QStringLiteral("--color-"));
+            const bool shouldKeep = keyFilter(key) || !isColor;
+            if (!shouldKeep) {
+                continue;
+            }
+            if (!valuesByKey.contains(key)) {
+                keyOrder.append(key);
+            }
+            valuesByKey.insert(key, entry.second);
+        }
+
+        for (const ColorRow &row : colorRows_) {
+            if (!keyFilter(row.key)) {
+                continue;
+            }
+            if (!valuesByKey.contains(row.key)) {
+                keyOrder.append(row.key);
+            }
+            valuesByKey.insert(row.key, toCssColor(colorForKey(row.key)));
+        }
 
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
             return false;
@@ -1348,19 +1370,8 @@ void ChromackPanel::writeColors()
         QTextStream stream(&file);
         stream << ":root {\n";
 
-        for (const ColorRow &row : colorRows_) {
-            if (!keyFilter(row.key)) {
-                continue;
-            }
-            const QColor color = colorForKey(row.key);
-            stream << "    " << row.key << ": " << toCssColor(color) << ";\n";
-        }
-
-        if (!preservedVariables.isEmpty()) {
-            stream << '\n';
-            for (const auto &entry : preservedVariables) {
-                stream << "    " << entry.first << ": " << entry.second << ";\n";
-            }
+        for (const QString &key : keyOrder) {
+            stream << "    " << key << ": " << valuesByKey.value(key) << ";\n";
         }
 
         stream << "}\n";

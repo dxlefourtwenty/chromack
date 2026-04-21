@@ -113,6 +113,13 @@ wait_for_chromack() {
     return 1
 }
 
+is_chromack_running() {
+    local chromack_bin="$1"
+    local pids=()
+    mapfile -t pids < <(collect_pids "$chromack_bin")
+    [[ ${#pids[@]} -gt 0 ]]
+}
+
 main() {
     local dry_run=0
     local chromack_bin=""
@@ -138,13 +145,21 @@ main() {
 
     if [[ "$dry_run" -eq 1 ]]; then
         printf 'binary=%s\n' "$chromack_bin"
-        printf 'state=closed\n'
+        if is_chromack_running "$chromack_bin"; then
+            printf 'action=reload\n'
+        else
+            printf 'action=start\n'
+        fi
         return 0
     fi
 
     [[ -x "$chromack_bin" ]] || return 1
 
-    stop_chromack "$chromack_bin"
+    if is_chromack_running "$chromack_bin"; then
+        "$chromack_bin" --reload >/dev/null 2>&1
+        return $?
+    fi
+
     write_state "closed"
     start_chromack "$chromack_bin"
     wait_for_chromack "$chromack_bin"
