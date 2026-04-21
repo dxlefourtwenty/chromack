@@ -2752,8 +2752,8 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: /home/dxle/builds/chromack/src/
   /usr/include/qt6/QtGui/QClipboard \
   /usr/include/qt6/QtGui/QColor \
   /usr/include/qt6/QtGui/QCursor \
+  /usr/include/qt6/QtGui/QFont \
   /usr/include/qt6/QtGui/QGuiApplication \
-  /usr/include/qt6/QtGui/QIcon \
   /usr/include/qt6/QtGui/QKeyEvent \
   /usr/include/qt6/QtGui/QMouseEvent \
   /usr/include/qt6/QtGui/QPainter \
@@ -4613,8 +4613,6 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QWaylandAdwaitaDecorationPluginAdditionalTargetInfo.cmake:
 
-/usr/include/qt6/QtGui/QIcon:
-
 /usr/lib/cmake/Qt6Gui/Qt6GuiConfigVersionImpl.cmake:
 
 /usr/include/c++/15.2.1/bits/specfun.h:
@@ -4922,6 +4920,8 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 /usr/lib/cmake/Qt6Gui/Qt6QSvgPluginTargetsPrecheck.cmake:
 
 /usr/lib/cmake/Qt6DBusTools/Qt6DBusToolsDependencies.cmake:
+
+/usr/include/qt6/QtGui/QFont:
 
 /usr/lib/cmake/Qt6DBusTools/Qt6DBusToolsTargets-relwithdebinfo.cmake:
 

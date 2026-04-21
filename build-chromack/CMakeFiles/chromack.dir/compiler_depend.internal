@@ -2757,8 +2757,8 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o
  /usr/include/qt6/QtGui/QClipboard
  /usr/include/qt6/QtGui/QColor
  /usr/include/qt6/QtGui/QCursor
+ /usr/include/qt6/QtGui/QFont
  /usr/include/qt6/QtGui/QGuiApplication
- /usr/include/qt6/QtGui/QIcon
  /usr/include/qt6/QtGui/QKeyEvent
  /usr/include/qt6/QtGui/QMouseEvent
  /usr/include/qt6/QtGui/QPainter

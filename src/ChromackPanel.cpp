@@ -7,10 +7,10 @@
 #include <QEasingCurve>
 #include <QFile>
 #include <QFileInfo>
+#include <QFont>
 #include <QGuiApplication>
 #include <QGridLayout>
 #include <QHBoxLayout>
-#include <QIcon>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QLineEdit>
@@ -526,6 +526,24 @@ bool copyToWaylandClipboard(const QString &text)
     return process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0;
 }
 
+QString copyButtonGlyph()
+{
+    return QString::fromUtf8(u8"󰆏");
+}
+
+void configureInlineCopyButton(QPushButton *button)
+{
+    if (!button) {
+        return;
+    }
+
+    QFont glyphFont = button->font();
+    glyphFont.setPixelSize(20);
+    glyphFont.setBold(true);
+    button->setFont(glyphFont);
+    button->setText(copyButtonGlyph());
+}
+
 void notifyCopiedColor(const QString &value, const QColor &color)
 {
     if (value.isEmpty()) {
@@ -587,20 +605,6 @@ void notifyCopiedColor(const QString &value, const QColor &color)
                                     << QStringLiteral("Color Picker")
                                     << value);
     }
-}
-
-QIcon copyIconFor(QWidget *widget)
-{
-    const QIcon themed = QIcon::fromTheme(QStringLiteral("edit-copy"));
-    if (!themed.isNull()) {
-        return themed;
-    }
-
-    if (widget && widget->style()) {
-        return widget->style()->standardIcon(QStyle::SP_FileDialogDetailedView);
-    }
-
-    return QIcon();
 }
 
 bool envWantsOpenByDefault(bool configDefault)
@@ -822,9 +826,7 @@ void ChromackPanel::buildUi()
 
     copyHexButton_ = new QPushButton(hexRow_);
     copyHexButton_->setObjectName(QStringLiteral("inlineCopyButton"));
-    copyHexButton_->setIcon(copyIconFor(copyHexButton_));
-    copyHexButton_->setIconSize(QSize(16, 16));
-    copyHexButton_->setText(QString());
+    configureInlineCopyButton(copyHexButton_);
     copyHexButton_->setToolTip(QStringLiteral("Copy hex"));
 
     rgbaLabel_ = new QLabel(QStringLiteral("RGBA"), hexRow_);
@@ -836,9 +838,7 @@ void ChromackPanel::buildUi()
 
     copyRgbaButton_ = new QPushButton(hexRow_);
     copyRgbaButton_->setObjectName(QStringLiteral("inlineCopyButton"));
-    copyRgbaButton_->setIcon(copyIconFor(copyRgbaButton_));
-    copyRgbaButton_->setIconSize(QSize(16, 16));
-    copyRgbaButton_->setText(QString());
+    configureInlineCopyButton(copyRgbaButton_);
     copyRgbaButton_->setToolTip(QStringLiteral("Copy rgba"));
 
     hexLayout_->addWidget(hexLabel_);
@@ -890,7 +890,7 @@ void ChromackPanel::buildUi()
     paletteInputLayout_->addWidget(paletteGenerateButton_);
 
     paletteStatusLabel_ = new QLabel(
-        QStringLiteral("Generate terminal colors (normal, bright, dim) from a base hex or rgba value"),
+        QStringLiteral("Generate 24-based color palette from a base hex or rgba value"),
         paletteTab_);
     paletteStatusLabel_->setObjectName(QStringLiteral("headerSubtitle"));
     paletteStatusLabel_->setWordWrap(true);
@@ -1133,8 +1133,7 @@ void ChromackPanel::buildPaletteRows()
 
         row.copyButton = new QPushButton(paletteGridFrame_);
         row.copyButton->setObjectName(QStringLiteral("inlineCopyButton"));
-        row.copyButton->setIcon(copyIconFor(row.copyButton));
-        row.copyButton->setIconSize(QSize(16, 16));
+        configureInlineCopyButton(row.copyButton);
         row.copyButton->setToolTip(QStringLiteral("Copy color"));
         row.copyButton->setEnabled(false);
 
@@ -1449,7 +1448,7 @@ void ChromackPanel::generateTerminalPalette()
         paletteRows_[i].copyButton->setEnabled(true);
     }
 
-    paletteStatusLabel_->setText(QStringLiteral("Generated terminal 24 palette (+foreground/background) from %1").arg(baseText));
+    paletteStatusLabel_->setText(QStringLiteral("Generated 24-base palette from %1").arg(baseText));
 }
 
 void ChromackPanel::updatePaletteInputSwatch(const QColor &color)

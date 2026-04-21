@@ -398,16 +398,17 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: \
  /usr/include/qt6/QtCore/qfile.h /usr/include/qt6/QtCore/qfileinfo.h \
  /usr/include/qt6/QtCore/qtimezone.h /usr/include/qt6/QtCore/QEasingCurve \
  /usr/include/qt6/QtCore/qeasingcurve.h /usr/include/qt6/QtCore/QFile \
- /usr/include/qt6/QtCore/QFileInfo /usr/include/qt6/QtGui/QGuiApplication \
+ /usr/include/qt6/QtCore/QFileInfo /usr/include/qt6/QtGui/QFont \
+ /usr/include/qt6/QtGui/QGuiApplication \
  /usr/include/qt6/QtWidgets/QGridLayout \
  /usr/include/qt6/QtWidgets/qgridlayout.h \
  /usr/include/qt6/QtWidgets/qlayout.h \
  /usr/include/qt6/QtWidgets/qlayoutitem.h \
  /usr/include/qt6/QtWidgets/qboxlayout.h \
- /usr/include/qt6/QtWidgets/QHBoxLayout /usr/include/qt6/QtGui/QIcon \
- /usr/include/qt6/QtGui/QKeyEvent /usr/include/qt6/QtGui/qevent.h \
- /usr/include/qt6/QtCore/qurl.h /usr/include/qt6/QtGui/qeventpoint.h \
- /usr/include/qt6/QtGui/qvector2d.h /usr/include/qt6/QtGui/qvectornd.h \
+ /usr/include/qt6/QtWidgets/QHBoxLayout /usr/include/qt6/QtGui/QKeyEvent \
+ /usr/include/qt6/QtGui/qevent.h /usr/include/qt6/QtCore/qurl.h \
+ /usr/include/qt6/QtGui/qeventpoint.h /usr/include/qt6/QtGui/qvector2d.h \
+ /usr/include/qt6/QtGui/qvectornd.h \
  /usr/include/qt6/QtGui/qpointingdevice.h \
  /usr/include/qt6/QtGui/qinputdevice.h /usr/include/qt6/QtGui/qscreen.h \
  /usr/include/qt6/QtCore/QList /usr/include/qt6/QtCore/QObject \

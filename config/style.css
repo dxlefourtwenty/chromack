@@ -315,6 +315,8 @@ QPushButton#inlineCopyButton {
     max-width: var(--input-height);
     max-height: var(--input-height);
     padding: 0;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 QPushButton#inlineCopyButton:hover,

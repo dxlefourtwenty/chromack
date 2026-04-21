@@ -536,6 +536,8 @@ QPushButton#inlineCopyButton {
     background: var(--input-bg);
     color: var(--text-color);
     padding: 0;
+    font-size: 18px;
+    font-weight: 600;
 }
 
 QPushButton#inlineCopyButton:hover {
