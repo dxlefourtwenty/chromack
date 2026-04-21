@@ -1337,11 +1337,15 @@ void ChromackPanel::buildShadesRows()
             row.swatches.append(swatch);
 
             connect(swatch, &QPushButton::clicked, this, [this, swatch]() {
-                const QString value = swatch->property("shadeColor").toString();
+                const QString value = swatch->property("shadeColor").toString().trimmed();
                 if (value.isEmpty()) {
                     return;
                 }
-                copyTextValue(value);
+                const QColor parsed = parseColorValue(value);
+                if (!parsed.isValid()) {
+                    return;
+                }
+                copyTextValue(toCssColor(parsed));
             });
         }
 
