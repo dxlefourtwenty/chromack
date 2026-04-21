@@ -190,6 +190,146 @@ private:
     }
 };
 
+class ColorTheoryWheel : public QWidget {
+public:
+    explicit ColorTheoryWheel(QWidget *parent = nullptr)
+        : QWidget(parent)
+    {
+        setObjectName(QStringLiteral("theoryWheel"));
+        setMinimumHeight(315);
+        setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        setMouseTracking(true);
+    }
+
+    void setSegments(const QList<QColor> &segments)
+    {
+        segments_ = segments;
+        update();
+    }
+
+    std::function<void(const QColor &)> onSegmentClicked;
+
+protected:
+    void paintEvent(QPaintEvent *event) override
+    {
+        Q_UNUSED(event);
+
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing, true);
+
+        if (segments_.isEmpty()) {
+            return;
+        }
+
+        const int side = qMin(width(), height());
+        const QRectF circleRect((width() - side) / 2.0 + 4.0,
+                                (height() - side) / 2.0 + 4.0,
+                                side - 8.0,
+                                side - 8.0);
+        const qreal innerScale = 0.54;
+
+        const qreal spanDegrees = 360.0 / static_cast<qreal>(segments_.size());
+        for (int index = 0; index < segments_.size(); ++index) {
+            const qreal startDegrees = 90.0 - (index * spanDegrees);
+            QColor segmentColor = segments_.at(index);
+            qreal borderWidth = 1.0;
+            if (index == hoveredIndex_) {
+                segmentColor = segmentColor.lighter(118);
+                borderWidth = 2.0;
+            }
+            painter.setBrush(segmentColor);
+            painter.setPen(QPen(palette().color(QPalette::Mid), borderWidth));
+            painter.drawPie(circleRect,
+                            qRound(startDegrees * 16.0),
+                            qRound(-spanDegrees * 16.0));
+        }
+
+        const qreal innerDiameter = circleRect.width() * innerScale;
+        const QRectF innerRect(circleRect.center().x() - (innerDiameter / 2.0),
+                               circleRect.center().y() - (innerDiameter / 2.0),
+                               innerDiameter,
+                               innerDiameter);
+        painter.setPen(QPen(palette().color(QPalette::Mid), 1.0));
+        painter.setBrush(palette().color(QPalette::Window));
+        painter.drawEllipse(innerRect);
+    }
+
+    void mousePressEvent(QMouseEvent *event) override
+    {
+        if (event->button() != Qt::LeftButton || segments_.isEmpty()) {
+            QWidget::mousePressEvent(event);
+            return;
+        }
+
+        const int index = hitTestIndex(event->position());
+        if (index >= 0 && index < segments_.size() && onSegmentClicked) {
+            onSegmentClicked(segments_.at(index));
+        }
+    }
+
+    void mouseMoveEvent(QMouseEvent *event) override
+    {
+        const int index = hitTestIndex(event->position());
+        if (hoveredIndex_ != index) {
+            hoveredIndex_ = index;
+            update();
+        }
+
+        if (index >= 0) {
+            setCursor(Qt::PointingHandCursor);
+        } else {
+            unsetCursor();
+        }
+
+        QWidget::mouseMoveEvent(event);
+    }
+
+    void leaveEvent(QEvent *event) override
+    {
+        if (hoveredIndex_ != -1) {
+            hoveredIndex_ = -1;
+            update();
+        }
+        unsetCursor();
+        QWidget::leaveEvent(event);
+    }
+
+private:
+    int hitTestIndex(const QPointF &position) const
+    {
+        if (segments_.isEmpty()) {
+            return -1;
+        }
+
+        const int side = qMin(width(), height());
+        const QRectF circleRect((width() - side) / 2.0 + 4.0,
+                                (height() - side) / 2.0 + 4.0,
+                                side - 8.0,
+                                side - 8.0);
+        const QPointF center = circleRect.center();
+        const QPointF delta = position - center;
+        const qreal radius = std::sqrt((delta.x() * delta.x()) + (delta.y() * delta.y()));
+        const qreal outerRadius = circleRect.width() / 2.0;
+        const qreal innerRadius = outerRadius * 0.54;
+        if (radius < innerRadius || radius > outerRadius) {
+            return -1;
+        }
+
+        constexpr qreal kPi = 3.14159265358979323846;
+        qreal degrees = std::atan2(-delta.y(), delta.x()) * (180.0 / kPi);
+        if (degrees < 0.0) {
+            degrees += 360.0;
+        }
+
+        const qreal rotatedDegrees = std::fmod((90.0 - degrees) + 360.0, 360.0);
+        const qreal spanDegrees = 360.0 / static_cast<qreal>(segments_.size());
+        return qBound(0, static_cast<int>(rotatedDegrees / spanDegrees), segments_.size() - 1);
+    }
+
+    QList<QColor> segments_;
+    int hoveredIndex_ = -1;
+};
+
 namespace {
 
 constexpr int kMaterialSwatchGapPx = 2;
@@ -542,6 +682,102 @@ QList<QColor> buildToneScale(const QColor &base, int steps)
     return colors;
 }
 
+qreal wrapHueDegrees(qreal hue)
+{
+    const qreal wrapped = std::fmod(hue, 360.0);
+    return wrapped < 0.0 ? wrapped + 360.0 : wrapped;
+}
+
+QColor colorAtHue(const QColor &base, qreal hueDegrees, qreal saturationScale = 1.0, qreal valueScale = 1.0)
+{
+    float hue = 0.0f;
+    float saturation = 0.0f;
+    float value = 0.0f;
+    float alpha = 1.0f;
+    base.getHsvF(&hue, &saturation, &value, &alpha);
+    if (hue < 0.0f) {
+        hue = 0.0f;
+    }
+
+    const qreal normalizedHue = wrapHueDegrees(hueDegrees) / 360.0;
+    const qreal nextSaturation = qBound(0.0, saturation * saturationScale, 1.0);
+    const qreal nextValue = qBound(0.0, value * valueScale, 1.0);
+    return QColor::fromHsvF(normalizedHue, nextSaturation, nextValue, alpha);
+}
+
+QList<QColor> complementaryTheory(const QColor &base)
+{
+    const qreal baseHue = wrapHueDegrees(base.hsvHueF() < 0.0 ? 0.0 : base.hsvHueF() * 360.0);
+    return {colorAtHue(base, baseHue), colorAtHue(base, baseHue + 180.0)};
+}
+
+QList<QColor> analogousTheory(const QColor &base)
+{
+    const qreal baseHue = wrapHueDegrees(base.hsvHueF() < 0.0 ? 0.0 : base.hsvHueF() * 360.0);
+    return {colorAtHue(base, baseHue - 30.0), colorAtHue(base, baseHue), colorAtHue(base, baseHue + 30.0)};
+}
+
+QList<QColor> splitComplementaryTheory(const QColor &base)
+{
+    const qreal baseHue = wrapHueDegrees(base.hsvHueF() < 0.0 ? 0.0 : base.hsvHueF() * 360.0);
+    return {colorAtHue(base, baseHue), colorAtHue(base, baseHue + 150.0), colorAtHue(base, baseHue + 210.0)};
+}
+
+QList<QColor> triadicTheory(const QColor &base)
+{
+    const qreal baseHue = wrapHueDegrees(base.hsvHueF() < 0.0 ? 0.0 : base.hsvHueF() * 360.0);
+    return {colorAtHue(base, baseHue), colorAtHue(base, baseHue + 120.0), colorAtHue(base, baseHue + 240.0)};
+}
+
+QList<QColor> tetradicTheory(const QColor &base)
+{
+    const qreal baseHue = wrapHueDegrees(base.hsvHueF() < 0.0 ? 0.0 : base.hsvHueF() * 360.0);
+    return {
+        colorAtHue(base, baseHue),
+        colorAtHue(base, baseHue + 90.0),
+        colorAtHue(base, baseHue + 180.0),
+        colorAtHue(base, baseHue + 270.0)
+    };
+}
+
+QList<QColor> monochromaticTheory(const QColor &base)
+{
+    QList<QColor> result;
+    result.reserve(7);
+
+    float baseHue = 0.0f;
+    float baseSaturation = 0.0f;
+    float baseValue = 0.0f;
+    float alpha = 1.0f;
+    base.getHsvF(&baseHue, &baseSaturation, &baseValue, &alpha);
+    if (baseHue < 0.0f) {
+        baseHue = 0.0f;
+    }
+
+    const QList<qreal> valueSteps = {0.40, 0.52, 0.64, 0.76, 0.84, 0.92, 1.0};
+    const QList<qreal> saturationSteps = {1.10, 1.06, 1.02, 0.98, 0.90, 0.82, 0.74};
+    for (int i = 0; i < valueSteps.size(); ++i) {
+        const qreal adjustedValue = qBound(0.0, baseValue * valueSteps.at(i), 1.0);
+        const qreal adjustedSaturation = qBound(0.0, baseSaturation * saturationSteps.at(i), 1.0);
+        result.append(QColor::fromHsvF(baseHue, adjustedSaturation, adjustedValue, alpha));
+    }
+
+    return result;
+}
+
+QList<QColor> theoryWheelColors(const QColor &base)
+{
+    QList<QColor> colors;
+    colors.reserve(24);
+    const qreal baseHue = wrapHueDegrees(base.hsvHueF() < 0.0 ? 0.0 : base.hsvHueF() * 360.0);
+    constexpr int kWheelSegments = 24;
+    constexpr qreal kStep = 360.0 / kWheelSegments;
+    for (int i = 0; i < kWheelSegments; ++i) {
+        colors.append(colorAtHue(base, baseHue + (kStep * i)));
+    }
+    return colors;
+}
+
 bool isMaterialColorKey(const QString &key)
 {
     return key.startsWith(QStringLiteral("--color-material-"));
@@ -824,6 +1060,13 @@ void ChromackPanel::buildUi()
     paletteLayout_->setSpacing(8);
     paletteLayout_->setAlignment(Qt::AlignTop);
 
+    theoryTab_ = new QWidget(tabWidget_);
+    theoryTab_->setObjectName(QStringLiteral("theoryTab"));
+    theoryLayout_ = new QVBoxLayout(theoryTab_);
+    theoryLayout_->setContentsMargins(10, 10, 10, 10);
+    theoryLayout_->setSpacing(8);
+    theoryLayout_->setAlignment(Qt::AlignTop);
+
     scrollArea_ = new QScrollArea(pickerTab_);
     scrollArea_->setObjectName(QStringLiteral("pickerScrollArea"));
     scrollArea_->setWidgetResizable(true);
@@ -1011,10 +1254,12 @@ void ChromackPanel::buildUi()
     paletteLayout_->addWidget(paletteScrollArea_, 1);
 
     buildShadesRows();
+    buildTheoryRows();
 
     tabWidget_->addTab(pickerTab_, QStringLiteral("Color Picker"));
-    tabWidget_->addTab(shadesTab_, QStringLiteral("Shades"));
-    tabWidget_->addTab(paletteTab_, QStringLiteral("Palette Generator"));
+    tabWidget_->addTab(shadesTab_, QStringLiteral("Shade"));
+    tabWidget_->addTab(paletteTab_, QStringLiteral("Palette"));
+    tabWidget_->addTab(theoryTab_, QStringLiteral("Theory"));
 
     panelLayout_->addWidget(tabWidget_, 1);
 
@@ -1037,6 +1282,14 @@ void ChromackPanel::buildUi()
         connect(shadesInput_, &QLineEdit::returnPressed, this, &ChromackPanel::generateTerminalPalette);
         connect(shadesInput_, &QLineEdit::editingFinished, this, &ChromackPanel::applyPaletteInputToActiveColor);
         connect(shadesInput_, &QLineEdit::textChanged, this, [this](const QString &value) {
+            updatePaletteInputSwatch(parseColorValue(value.trimmed()));
+        });
+    }
+    if (theoryGenerateButton_ && theoryInput_) {
+        connect(theoryGenerateButton_, &QPushButton::clicked, this, &ChromackPanel::applyPaletteInputToActiveColor);
+        connect(theoryInput_, &QLineEdit::returnPressed, this, &ChromackPanel::applyPaletteInputToActiveColor);
+        connect(theoryInput_, &QLineEdit::editingFinished, this, &ChromackPanel::applyPaletteInputToActiveColor);
+        connect(theoryInput_, &QLineEdit::textChanged, this, [this](const QString &value) {
             updatePaletteInputSwatch(parseColorValue(value.trimmed()));
         });
     }
@@ -1410,6 +1663,157 @@ void ChromackPanel::buildShadesRows()
     refreshShadesRows();
 }
 
+void ChromackPanel::buildTheoryRows()
+{
+    if (!theoryTab_) {
+        return;
+    }
+
+    auto *layout = qobject_cast<QVBoxLayout *>(theoryTab_->layout());
+    if (!layout) {
+        return;
+    }
+
+    while (QLayoutItem *item = layout->takeAt(0)) {
+        if (item->widget()) {
+            item->widget()->deleteLater();
+        }
+        delete item;
+    }
+
+    theorySchemeRows_.clear();
+    theoryStatusLabel_ = nullptr;
+    theoryWheelWidget_ = nullptr;
+
+    theoryInputRow_ = new QFrame(theoryTab_);
+    theoryInputRow_->setObjectName(QStringLiteral("paletteInputRow"));
+    theoryInputLayout_ = new QHBoxLayout(theoryInputRow_);
+    theoryInputLayout_->setContentsMargins(0, 0, 0, 0);
+    theoryInputLayout_->setSpacing(8);
+
+    theoryInputLabel_ = new QLabel(QStringLiteral("Base"), theoryInputRow_);
+    theoryInputLabel_->setObjectName(QStringLiteral("rowLabel"));
+
+    theoryInput_ = new QLineEdit(theoryInputRow_);
+    theoryInput_->setObjectName(QStringLiteral("paletteInput"));
+    theoryInput_->setPlaceholderText(QStringLiteral("#5f6b7b or rgba(95, 107, 123, 1)"));
+
+    theoryInputSwatch_ = new QPushButton(theoryInputRow_);
+    theoryInputSwatch_->setObjectName(QStringLiteral("paletteInputSwatch"));
+    theoryInputSwatch_->setEnabled(false);
+    theoryInputSwatch_->setFocusPolicy(Qt::NoFocus);
+    theoryInputSwatch_->setToolTip(QString());
+    theoryInputSwatch_->setStyleSheet(QStringLiteral("background: transparent;"));
+
+    theoryGenerateButton_ = new QPushButton(QStringLiteral("Generate"), theoryInputRow_);
+    theoryGenerateButton_->setObjectName(QStringLiteral("paletteGenerateButton"));
+
+    theoryInputLayout_->addWidget(theoryInputLabel_);
+    theoryInputLayout_->addWidget(theoryInputSwatch_);
+    theoryInputLayout_->addWidget(theoryInput_, 1);
+    theoryInputLayout_->addWidget(theoryGenerateButton_);
+    layout->addWidget(theoryInputRow_);
+
+    theoryStatusLabel_ = new QLabel(QStringLiteral("Generate color theory values"), theoryTab_);
+    theoryStatusLabel_->setObjectName(QStringLiteral("headerSubtitle"));
+    theoryStatusLabel_->setWordWrap(true);
+    layout->addWidget(theoryStatusLabel_);
+
+    theoryScrollArea_ = new QScrollArea(theoryTab_);
+    theoryScrollArea_->setObjectName(QStringLiteral("theoryScrollArea"));
+    theoryScrollArea_->setWidgetResizable(true);
+    theoryScrollArea_->setFrameShape(QFrame::NoFrame);
+    theoryScrollArea_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    theoryContainer_ = new QWidget(theoryScrollArea_);
+    theoryContainer_->setObjectName(QStringLiteral("theoryContainer"));
+    theoryContainerLayout_ = new QVBoxLayout(theoryContainer_);
+    theoryContainerLayout_->setContentsMargins(0, 0, 0, 0);
+    theoryContainerLayout_->setSpacing(8);
+    theoryContainerLayout_->setAlignment(Qt::AlignTop);
+
+    auto *theoryContentFrame = new QFrame(theoryContainer_);
+    theoryContentFrame->setObjectName(QStringLiteral("theoryContentFrame"));
+    auto *theoryContentLayout = new QVBoxLayout(theoryContentFrame);
+    theoryContentLayout->setContentsMargins(8, 8, 8, 8);
+    theoryContentLayout->setSpacing(8);
+    theoryContentLayout->setAlignment(Qt::AlignTop);
+
+    const QList<QPair<QString, int>> schemeDefinitions = {
+        {QStringLiteral("Complementary Color"), 2},
+        {QStringLiteral("Analogous Color"), 3},
+        {QStringLiteral("Split Complementary Color"), 3},
+        {QStringLiteral("Triadic Color"), 3},
+        {QStringLiteral("Tetradic Color"), 4},
+        {QStringLiteral("Monochromatic Color"), 7}
+    };
+
+    for (const auto &definition : schemeDefinitions) {
+        TheorySchemeRow row;
+        auto *frame = new QFrame(theoryContainer_);
+        frame->setObjectName(QStringLiteral("theorySchemeFrame"));
+        auto *frameLayout = new QVBoxLayout(frame);
+        frameLayout->setContentsMargins(0, 0, 0, 0);
+        frameLayout->setSpacing(6);
+
+        row.titleLabel = new QLabel(definition.first, frame);
+        row.titleLabel->setObjectName(QStringLiteral("sectionLabel"));
+        frameLayout->addWidget(row.titleLabel);
+
+        auto *swatchRow = new QFrame(frame);
+        swatchRow->setObjectName(QStringLiteral("theorySwatchRow"));
+        row.swatchLayout = new QHBoxLayout(swatchRow);
+        row.swatchLayout->setContentsMargins(0, 0, 0, 0);
+        row.swatchLayout->setSpacing(0);
+
+        for (int i = 0; i < definition.second; ++i) {
+            auto *swatch = new QPushButton(swatchRow);
+            swatch->setObjectName(QStringLiteral("theorySwatch"));
+            swatch->setEnabled(false);
+            swatch->setFocusPolicy(Qt::NoFocus);
+            swatch->setProperty("theoryColor", QString());
+            row.swatchLayout->addWidget(swatch, 1);
+            row.swatches.append(swatch);
+
+            connect(swatch, &QPushButton::clicked, this, [this, swatch]() {
+                const QString value = swatch->property("theoryColor").toString().trimmed();
+                if (value.isEmpty()) {
+                    return;
+                }
+                copyTextValue(value);
+            });
+        }
+
+        frameLayout->addWidget(swatchRow);
+        theoryContentLayout->addWidget(frame);
+        theorySchemeRows_.append(row);
+    }
+
+    theoryContentLayout->addSpacing(10);
+    auto *wheelTitle = new QLabel(QStringLiteral("Color Wheel"), theoryContentFrame);
+    wheelTitle->setObjectName(QStringLiteral("sectionLabel"));
+    theoryContentLayout->addWidget(wheelTitle);
+
+    auto *wheel = new ColorTheoryWheel(theoryContainer_);
+    wheel->setObjectName(QStringLiteral("theoryWheel"));
+    wheel->onSegmentClicked = [this](const QColor &color) {
+        copyTextValue(toCssColor(color));
+    };
+    theoryWheelWidget_ = wheel;
+    theoryContentLayout->addWidget(wheel);
+
+    theoryContainerLayout_->addWidget(theoryContentFrame);
+    theoryContainerLayout_->addStretch(1);
+
+    theoryScrollArea_->setWidget(theoryContainer_);
+    if (theoryScrollArea_->viewport()) {
+        theoryScrollArea_->viewport()->setObjectName(QStringLiteral("theoryViewport"));
+    }
+
+    layout->addWidget(theoryScrollArea_, 1);
+    refreshTheoryRows();
+}
+
 void ChromackPanel::refreshShadesRows()
 {
     if (shadeRows_.size() < 3) {
@@ -1469,6 +1873,61 @@ void ChromackPanel::refreshShadesRows()
             QStringLiteral("%1 is least saturated while %2 is most saturated.")
                 .arg(tones.first().name(QColor::HexRgb).toLower(),
                      tones.last().name(QColor::HexRgb).toLower()));
+    }
+}
+
+void ChromackPanel::refreshTheoryRows()
+{
+    if (theorySchemeRows_.size() < 6) {
+        return;
+    }
+
+    const QColor base = activeColor();
+    if (!base.isValid()) {
+        return;
+    }
+
+    const QList<QList<QColor>> schemes = {
+        complementaryTheory(base),
+        analogousTheory(base),
+        splitComplementaryTheory(base),
+        triadicTheory(base),
+        tetradicTheory(base),
+        monochromaticTheory(base)
+    };
+
+    for (int rowIndex = 0; rowIndex < theorySchemeRows_.size(); ++rowIndex) {
+        const QList<QColor> colors = rowIndex < schemes.size() ? schemes.at(rowIndex) : QList<QColor> {};
+        const TheorySchemeRow &row = theorySchemeRows_.at(rowIndex);
+        for (int swatchIndex = 0; swatchIndex < row.swatches.size(); ++swatchIndex) {
+            QPushButton *swatch = row.swatches.at(swatchIndex);
+            if (!swatch) {
+                continue;
+            }
+
+            if (swatchIndex >= colors.size()) {
+                swatch->setEnabled(false);
+                swatch->setToolTip(QString());
+                swatch->setStyleSheet(QStringLiteral("background: transparent;"));
+                swatch->setProperty("theoryColor", QString());
+                continue;
+            }
+
+            const QString value = toCssColor(colors.at(swatchIndex));
+            swatch->setEnabled(true);
+            swatch->setToolTip(value);
+            swatch->setStyleSheet(QStringLiteral("background:%1;").arg(value));
+            swatch->setProperty("theoryColor", value);
+        }
+    }
+
+    auto *wheel = static_cast<ColorTheoryWheel *>(theoryWheelWidget_);
+    if (wheel) {
+        wheel->setSegments(theoryWheelColors(base));
+    }
+
+    if (theoryStatusLabel_) {
+        theoryStatusLabel_->setText(QStringLiteral("Generate color theory values"));
     }
 }
 
@@ -1552,12 +2011,16 @@ void ChromackPanel::setActiveColorKey(const QString &key)
     if (shadesInput_ && !shadesInput_->hasFocus()) {
         shadesInput_->setText(hexInput_->text());
     }
+    if (theoryInput_ && !theoryInput_->hasFocus()) {
+        theoryInput_->setText(hexInput_->text());
+    }
 
     syncingUi_ = false;
 
     updateColorPreview();
     updatePaletteInputSwatch(color);
     refreshShadesRows();
+    refreshTheoryRows();
     if (activeColorCacheReady_) {
         writeActiveColorCache();
     }
@@ -1617,12 +2080,16 @@ void ChromackPanel::setActiveColor(const QColor &color, bool pushRecent)
     if (shadesInput_ && !shadesInput_->hasFocus()) {
         shadesInput_->setText(hexInput_->text());
     }
+    if (theoryInput_ && !theoryInput_->hasFocus()) {
+        theoryInput_->setText(hexInput_->text());
+    }
 
     syncingUi_ = false;
 
     updateColorPreview();
     updatePaletteInputSwatch(color);
     refreshShadesRows();
+    refreshTheoryRows();
     refreshMaterialButtons();
     refreshRecentButtons();
     if (activeColorCacheReady_) {
@@ -1732,7 +2199,11 @@ void ChromackPanel::applyPaletteInputToActiveColor()
 {
     QLineEdit *sourceInput = qobject_cast<QLineEdit *>(sender());
     if (!sourceInput) {
-        sourceInput = paletteInput_;
+        if (sender() == theoryGenerateButton_) {
+            sourceInput = theoryInput_;
+        } else {
+            sourceInput = paletteInput_;
+        }
     }
     if (!sourceInput) {
         return;
@@ -1821,6 +2292,7 @@ void ChromackPanel::updatePaletteInputSwatch(const QColor &color)
 
     updateSwatch(paletteInputSwatch_);
     updateSwatch(shadesInputSwatch_);
+    updateSwatch(theoryInputSwatch_);
 }
 
 void ChromackPanel::applyConfig(const ChromackConfig &config)
@@ -1856,6 +2328,7 @@ void ChromackPanel::applyConfig(const ChromackConfig &config)
     };
     applyScrollBarPolicy(scrollArea_);
     applyScrollBarPolicy(paletteScrollArea_);
+    applyScrollBarPolicy(theoryScrollArea_);
 
     updatePanelGeometry(false);
 }

@@ -148,7 +148,7 @@ QTabWidget#panelTabs QTabBar::base {
 
 QTabWidget#panelTabs::pane {
     border: none;
-    background: var(--content-bg);
+    background: var(--content-backdrop-bg);
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     border-bottom-left-radius: var(--content-radius);
@@ -173,7 +173,7 @@ QTabWidget#panelTabs QTabBar::tab:selected {
 
 QWidget#pickerViewport,
 QWidget#pickerContainer {
-    background: var(--content-bg);
+    background: var(--content-backdrop-bg);
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     border-bottom-left-radius: var(--content-radius);
@@ -181,7 +181,7 @@ QWidget#pickerContainer {
 }
 
 QWidget#paletteTab {
-    background: var(--content-bg);
+    background: var(--content-backdrop-bg);
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     border-bottom-left-radius: var(--content-radius);
@@ -189,11 +189,32 @@ QWidget#paletteTab {
 }
 
 QWidget#shadesTab {
-    background: var(--content-bg);
+    background: var(--content-backdrop-bg);
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     border-bottom-left-radius: var(--content-radius);
     border-bottom-right-radius: var(--content-radius);
+}
+
+QWidget#theoryTab,
+QWidget#theoryContainer,
+QWidget#theoryViewport,
+QScrollArea#theoryScrollArea {
+    background: var(--color-surface-alt);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QFrame#theoryContentFrame {
+    background: var(--color-surface-alt);
+    border-radius: var(--content-radius);
+}
+
+QFrame#theorySchemeFrame,
+QFrame#theorySwatchRow {
+    background: transparent;
 }
 
 QFrame#pickerTopFrame {
@@ -372,6 +393,25 @@ QPushButton#shadeSwatch {
 
 QPushButton#shadeSwatch:hover {
     border-color: var(--text-color);
+}
+
+QPushButton#theorySwatch {
+    min-height: var(--input-height);
+    border: var(--control-border-width) solid var(--control-border-color);
+    border-radius: 0px;
+    margin: 0;
+    padding: 0;
+}
+
+QPushButton#theorySwatch:hover {
+    border-color: var(--text-color);
+}
+
+QWidget#theoryWheel {
+    min-height: 315px;
+    border: none;
+    border-radius: 0px;
+    background: transparent;
 }
 
 QPushButton#paletteInputSwatch {

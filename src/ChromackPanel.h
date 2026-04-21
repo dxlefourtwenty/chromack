@@ -66,9 +66,11 @@ private:
     void buildColorRows();
     void buildPaletteRows();
     void buildShadesRows();
+    void buildTheoryRows();
     void refreshMaterialButtons();
     void refreshRecentButtons();
     void refreshShadesRows();
+    void refreshTheoryRows();
     void setActiveColorKey(const QString &key);
     QColor colorForKey(const QString &key) const;
     QColor activeColor() const;
@@ -130,11 +132,18 @@ private:
     QWidget *pickerTab_ = nullptr;
     QWidget *shadesTab_ = nullptr;
     QWidget *paletteTab_ = nullptr;
+    QWidget *theoryTab_ = nullptr;
     QWidget *pickerContainer_ = nullptr;
     QWidget *paletteContainer_ = nullptr;
+    QWidget *theoryContainer_ = nullptr;
     QVBoxLayout *pickerLayout_ = nullptr;
     QVBoxLayout *paletteLayout_ = nullptr;
     QVBoxLayout *paletteContainerLayout_ = nullptr;
+    QVBoxLayout *theoryLayout_ = nullptr;
+    QVBoxLayout *theoryContainerLayout_ = nullptr;
+    QScrollArea *theoryScrollArea_ = nullptr;
+    QLabel *theoryStatusLabel_ = nullptr;
+    QWidget *theoryWheelWidget_ = nullptr;
 
     QFrame *pickerTopFrame_ = nullptr;
     QHBoxLayout *pickerTopLayout_ = nullptr;
@@ -176,6 +185,12 @@ private:
     QLineEdit *shadesInput_ = nullptr;
     QPushButton *shadesInputSwatch_ = nullptr;
     QPushButton *shadesGenerateButton_ = nullptr;
+    QFrame *theoryInputRow_ = nullptr;
+    QHBoxLayout *theoryInputLayout_ = nullptr;
+    QLabel *theoryInputLabel_ = nullptr;
+    QLineEdit *theoryInput_ = nullptr;
+    QPushButton *theoryInputSwatch_ = nullptr;
+    QPushButton *theoryGenerateButton_ = nullptr;
     QLabel *paletteStatusLabel_ = nullptr;
     QFrame *paletteGridFrame_ = nullptr;
     QGridLayout *paletteGridLayout_ = nullptr;
@@ -188,6 +203,14 @@ private:
     };
 
     QList<ShadeScaleRow> shadeRows_;
+
+    struct TheorySchemeRow {
+        QLabel *titleLabel = nullptr;
+        QHBoxLayout *swatchLayout = nullptr;
+        QList<QPushButton *> swatches;
+    };
+
+    QList<TheorySchemeRow> theorySchemeRows_;
 
     struct PaletteRow {
         QLabel *nameLabel = nullptr;
