@@ -67,6 +67,9 @@ private:
     void copyHexValue();
     void copyRgbaValue();
     void copyTextValue(const QString &value);
+    void pushRecentColor(const QColor &color, bool persist);
+    void loadRecentColors();
+    void writeRecentColors();
     void updatePanelGeometry(bool animated);
     QPoint openPosition() const;
     QPoint closedPosition() const;
@@ -85,6 +88,7 @@ private:
     QString colorsFilePath() const;
     QString materialFilePath() const;
     QString stateFilePath() const;
+    QString recentColorsFilePath() const;
     QString expandPath(QString value) const;
     void writeStateFile(const QString &value);
 

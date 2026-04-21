@@ -341,6 +341,69 @@ bool copyToWaylandClipboard(const QString &text)
     return process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0;
 }
 
+void notifyCopiedColor(const QString &value, const QColor &color)
+{
+    if (value.isEmpty()) {
+        return;
+    }
+
+    const QString hex = color.isValid() ? color.name(QColor::HexRgb).toUpper() : QString();
+    QStringList args;
+    args << QStringLiteral("-lc")
+         << QStringLiteral(
+                "value=\"$1\";"
+                "hex=\"$2\";"
+                "icon=\"/tmp/colorpick.png\";"
+                "state_file=\"/tmp/chromack-colorpicker-notify.state\";"
+                "timeout_ms=5000;"
+                "notify_bin=\"/home/dxle/bin/notify-send\";"
+                "if [[ ! -x \"$notify_bin\" ]]; then notify_bin=\"/usr/bin/notify-send\"; fi;"
+                "if [[ ! -x \"$notify_bin\" ]]; then exit 0; fi;"
+                "if [[ -n \"$hex\" ]] && command -v /usr/bin/magick >/dev/null 2>&1; then "
+                "/usr/bin/magick -size 32x32 xc:\"$hex\" \"$icon\" >/dev/null 2>&1 || true; "
+                "fi;"
+                "active_id=\"\";"
+                "if [[ -r \"$state_file\" ]]; then "
+                "mapfile -t lines < \"$state_file\" || true;"
+                "saved_id=\"${lines[0]-}\";"
+                "saved_created=\"${lines[1]-}\";"
+                "saved_timeout=\"${lines[2]-}\";"
+                "if [[ \"$saved_id\" =~ ^[0-9]+$ && \"$saved_created\" =~ ^[0-9]+$ && \"$saved_timeout\" =~ ^[0-9]+$ ]]; then "
+                "if [[ \"$saved_timeout\" -eq 0 ]]; then "
+                "active_id=\"$saved_id\";"
+                "else "
+                "now_s=\"$(/usr/bin/date +%s)\";"
+                "expires_s=$(( saved_created + ((saved_timeout + 999) / 1000) ));"
+                "if [[ \"$now_s\" -lt \"$expires_s\" ]]; then active_id=\"$saved_id\"; fi;"
+                "fi;"
+                "fi;"
+                "fi;"
+                "notify_args=(-a \"chromack-color-picker\" -p -t \"$timeout_ms\");"
+                "if [[ -n \"$active_id\" ]]; then notify_args+=(-r \"$active_id\"); fi;"
+                "if [[ -f \"$icon\" ]]; then notify_args+=(-i \"$icon\"); fi;"
+                "notify_args+=(\"Color Picker\" \"$value\");"
+                "notify_output=\"$(\"$notify_bin\" \"${notify_args[@]}\" 2>/dev/null || true)\";"
+                "new_id=\"$(printf '%s\\n' \"$notify_output\" | /usr/bin/awk 'NF { value=$NF } END { print value }')\";"
+                "if [[ \"$new_id\" =~ ^[0-9]+$ ]]; then "
+                "tmp_state=\"$(/usr/bin/mktemp /tmp/.chromack-colorpicker-notify.XXXXXX)\";"
+                "printf '%s\\n%s\\n%s\\n' \"$new_id\" \"$(/usr/bin/date +%s)\" \"$timeout_ms\" > \"$tmp_state\";"
+                "/usr/bin/mv -f \"$tmp_state\" \"$state_file\";"
+                "else "
+                "/usr/bin/rm -f \"$state_file\";"
+                "fi")
+         << QStringLiteral("--")
+         << value
+         << hex;
+    if (!QProcess::startDetached(QStringLiteral("/usr/bin/bash"), args)) {
+        QProcess::startDetached(QStringLiteral("/usr/bin/notify-send"),
+                                QStringList()
+                                    << QStringLiteral("-t")
+                                    << QStringLiteral("5000")
+                                    << QStringLiteral("Color Picker")
+                                    << value);
+    }
+}
+
 QIcon copyIconFor(QWidget *widget)
 {
     const QIcon themed = QIcon::fromTheme(QStringLiteral("edit-copy"));
@@ -402,6 +465,7 @@ ChromackPanel::ChromackPanel(ChromackConfigLoader *configLoader, QWidget *parent
     }
 
     buildUi();
+    loadRecentColors();
     buildColorRows();
     applyStyle(styleSheet_, styleVariables_);
     applyConfig(config_);
@@ -844,21 +908,7 @@ void ChromackPanel::setActiveColor(const QColor &color, bool pushRecent)
     styleVariables_.insert(activeColorKey_, toCssColor(color));
 
     if (pushRecent) {
-        int existingIndex = -1;
-        for (int i = 0; i < recentColors_.size(); ++i) {
-            if (recentColors_.at(i).rgba() == color.rgba()) {
-                existingIndex = i;
-                break;
-            }
-        }
-
-        if (existingIndex >= 0) {
-            recentColors_.removeAt(existingIndex);
-        }
-        recentColors_.prepend(color);
-        while (recentColors_.size() > kRecentColorSlots) {
-            recentColors_.removeLast();
-        }
+        pushRecentColor(color, true);
     }
 
     syncingUi_ = true;
@@ -916,16 +966,22 @@ void ChromackPanel::copyTextValue(const QString &value)
         return;
     }
 
-    if (copyToWaylandClipboard(value)) {
-        return;
+    if (!copyToWaylandClipboard(value)) {
+        QApplication::clipboard()->setText(value);
     }
 
-    QApplication::clipboard()->setText(value);
+    const QColor copiedColor = parseColorValue(value);
+    if (copiedColor.isValid()) {
+        pushRecentColor(copiedColor, true);
+    }
+
+    notifyCopiedColor(value, copiedColor);
 }
 
 void ChromackPanel::applyConfig(const ChromackConfig &config)
 {
     config_ = config;
+    loadRecentColors();
 
     Qt::WindowFlags flags = Qt::FramelessWindowHint | Qt::Tool;
     if (config_.layout.aboveWindows) {
@@ -952,6 +1008,88 @@ void ChromackPanel::applyConfig(const ChromackConfig &config)
     }
 
     updatePanelGeometry(false);
+}
+
+void ChromackPanel::pushRecentColor(const QColor &color, bool persist)
+{
+    if (!color.isValid()) {
+        return;
+    }
+
+    int existingIndex = -1;
+    for (int i = 0; i < recentColors_.size(); ++i) {
+        if (recentColors_.at(i).rgba() == color.rgba()) {
+            existingIndex = i;
+            break;
+        }
+    }
+
+    if (existingIndex >= 0) {
+        recentColors_.removeAt(existingIndex);
+    }
+
+    recentColors_.prepend(color);
+    while (recentColors_.size() > kRecentColorSlots) {
+        recentColors_.removeLast();
+    }
+
+    refreshRecentButtons();
+    if (persist) {
+        writeRecentColors();
+    }
+}
+
+void ChromackPanel::loadRecentColors()
+{
+    recentColors_.clear();
+
+    QFile file(recentColorsFilePath());
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream stream(&file);
+        while (!stream.atEnd()) {
+            const QString line = stream.readLine().trimmed();
+            if (line.isEmpty()) {
+                continue;
+            }
+            const QColor color = parseColorValue(line);
+            if (!color.isValid()) {
+                continue;
+            }
+            bool duplicate = false;
+            for (const QColor &existing : recentColors_) {
+                if (existing.rgba() == color.rgba()) {
+                    duplicate = true;
+                    break;
+                }
+            }
+            if (duplicate) {
+                continue;
+            }
+            recentColors_.append(color);
+            if (recentColors_.size() >= kRecentColorSlots) {
+                break;
+            }
+        }
+    }
+
+    refreshRecentButtons();
+}
+
+void ChromackPanel::writeRecentColors()
+{
+    const QString path = recentColorsFilePath();
+    const QFileInfo info(path);
+    QDir().mkpath(info.absolutePath());
+
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+        return;
+    }
+
+    QTextStream stream(&file);
+    for (const QColor &color : recentColors_) {
+        stream << toCssColor(color) << '\n';
+    }
 }
 
 void ChromackPanel::applyStyle(const QString &styleSheet, const QHash<QString, QString> &styleVariables)
@@ -1406,6 +1544,11 @@ QString ChromackPanel::materialFilePath() const
 QString ChromackPanel::stateFilePath() const
 {
     return expandPath(config_.paths.stateFile);
+}
+
+QString ChromackPanel::recentColorsFilePath() const
+{
+    return expandPath(config_.paths.recentColorsFile);
 }
 
 QString ChromackPanel::expandPath(QString value) const

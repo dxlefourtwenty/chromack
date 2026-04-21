@@ -117,7 +117,8 @@ QString defaultConfigContents()
         "style_css = \"~/.config/chromack/style.css\"\n"
         "colors_css = \"~/.config/chromack/colors.css\"\n"
         "material_css = \"~/.config/chromack/material.css\"\n"
-        "state_file = \"${XDG_RUNTIME_DIR}/chromack/panel.state\"\n");
+        "state_file = \"${XDG_RUNTIME_DIR}/chromack/panel.state\"\n"
+        "recent_colors_file = \"~/.cache/chromack/recent-colors.txt\"\n");
 }
 
 QString defaultColorsContents()
@@ -679,6 +680,8 @@ void loadConfig(const QString &path, ChromackConfig *config)
                 parseString(value, &config->paths.materialCss);
             } else if (key == QStringLiteral("state_file")) {
                 parseString(value, &config->paths.stateFile);
+            } else if (key == QStringLiteral("recent_colors_file")) {
+                parseString(value, &config->paths.recentColorsFile);
             }
         }
     }
