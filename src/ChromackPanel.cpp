@@ -221,7 +221,8 @@ QColor parseColorValue(const QString &value)
     }
 
     static const QRegularExpression rgbaPattern(
-        QStringLiteral(R"(^rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*([0-9]*\.?[0-9]+)\s*\)$)"),
+        QStringLiteral(
+            R"(^rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*([0-9]*\.?[0-9]+)\s*)?\)$)"),
         QRegularExpression::CaseInsensitiveOption);
     const QRegularExpressionMatch match = rgbaPattern.match(trimmed);
     if (!match.hasMatch()) {
@@ -231,12 +232,15 @@ QColor parseColorValue(const QString &value)
     bool okR = false;
     bool okG = false;
     bool okB = false;
-    bool okA = false;
+    bool okA = true;
 
     const int r = match.captured(1).toInt(&okR);
     const int g = match.captured(2).toInt(&okG);
     const int b = match.captured(3).toInt(&okB);
-    const qreal a = match.captured(4).toDouble(&okA);
+    qreal a = 1.0;
+    if (!match.captured(4).isEmpty()) {
+        a = match.captured(4).toDouble(&okA);
+    }
     if (!okR || !okG || !okB || !okA) {
         return QColor();
     }
@@ -619,7 +623,7 @@ void ChromackPanel::buildUi()
 
     rgbaInput_ = new QLineEdit(hexRow_);
     rgbaInput_->setObjectName(QStringLiteral("rgbaInput"));
-    rgbaInput_->setReadOnly(true);
+    rgbaInput_->setReadOnly(false);
 
     copyRgbaButton_ = new QPushButton(hexRow_);
     copyRgbaButton_->setObjectName(QStringLiteral("inlineCopyButton"));
@@ -705,6 +709,20 @@ void ChromackPanel::buildUi()
 
         if (parsed.alpha() == 255) {
             parsed.setAlpha(opacitySlider_->value());
+        }
+
+        setActiveColor(parsed, false);
+    });
+
+    connect(rgbaInput_, &QLineEdit::editingFinished, this, [this]() {
+        if (activeColorKey_.isEmpty()) {
+            return;
+        }
+
+        const QColor parsed = parseColorValue(rgbaInput_->text());
+        if (!parsed.isValid()) {
+            updateColorPreview();
+            return;
         }
 
         setActiveColor(parsed, false);
