@@ -11,6 +11,7 @@
 class QFrame;
 class QGridLayout;
 class QHBoxLayout;
+class QLayout;
 class QLabel;
 class QLineEdit;
 class QPushButton;
@@ -60,8 +61,10 @@ private:
     void buildUi();
     void buildColorRows();
     void buildPaletteRows();
+    void buildShadesRows();
     void refreshMaterialButtons();
     void refreshRecentButtons();
+    void refreshShadesRows();
     void setActiveColorKey(const QString &key);
     QColor colorForKey(const QString &key) const;
     QColor activeColor() const;
@@ -74,6 +77,7 @@ private:
     void pushRecentColor(const QColor &color, bool persist);
     void loadRecentColors();
     void writeRecentColors();
+    void applyPaletteInputToActiveColor();
     void generateTerminalPalette();
     void updatePaletteInputSwatch(const QColor &color);
     void updatePanelGeometry(bool animated);
@@ -117,6 +121,7 @@ private:
     QScrollArea *paletteScrollArea_ = nullptr;
     QTabWidget *tabWidget_ = nullptr;
     QWidget *pickerTab_ = nullptr;
+    QWidget *shadesTab_ = nullptr;
     QWidget *paletteTab_ = nullptr;
     QWidget *pickerContainer_ = nullptr;
     QWidget *paletteContainer_ = nullptr;
@@ -161,6 +166,15 @@ private:
     QLabel *paletteStatusLabel_ = nullptr;
     QFrame *paletteGridFrame_ = nullptr;
     QGridLayout *paletteGridLayout_ = nullptr;
+
+    struct ShadeScaleRow {
+        QLabel *titleLabel = nullptr;
+        QLabel *statusLabel = nullptr;
+        QLayout *swatchLayout = nullptr;
+        QList<QPushButton *> swatches;
+    };
+
+    QList<ShadeScaleRow> shadeRows_;
 
     struct PaletteRow {
         QLabel *nameLabel = nullptr;

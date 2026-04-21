@@ -477,6 +477,71 @@ QString toRgbaColor(const QColor &color)
         .arg(alpha);
 }
 
+QList<QColor> buildShadeScale(const QColor &base, int steps)
+{
+    QList<QColor> colors;
+    if (!base.isValid() || steps <= 0) {
+        return colors;
+    }
+
+    colors.reserve(steps);
+    const QColor black(0, 0, 0, base.alpha());
+    const int divisor = qMax(1, steps - 1);
+    for (int i = 0; i < steps; ++i) {
+        const qreal amount = static_cast<qreal>(i) / static_cast<qreal>(divisor);
+        colors << blendColors(black, base, amount);
+    }
+    return colors;
+}
+
+QList<QColor> buildTintScale(const QColor &base, int steps)
+{
+    QList<QColor> colors;
+    if (!base.isValid() || steps <= 0) {
+        return colors;
+    }
+
+    colors.reserve(steps);
+    const QColor white(255, 255, 255, base.alpha());
+    const int divisor = qMax(1, steps - 1);
+    for (int i = 0; i < steps; ++i) {
+        const qreal amount = static_cast<qreal>(i) / static_cast<qreal>(divisor);
+        colors << blendColors(base, white, amount);
+    }
+    return colors;
+}
+
+QList<QColor> buildToneScale(const QColor &base, int steps)
+{
+    QList<QColor> colors;
+    if (!base.isValid() || steps <= 0) {
+        return colors;
+    }
+
+    float hue = 0.0f;
+    float saturation = 0.0f;
+    float value = 0.0f;
+    float alpha = 1.0f;
+    base.getHsvF(&hue, &saturation, &value, &alpha);
+    if (hue < 0.0) {
+        hue = 0.0;
+    }
+
+    const qreal minSaturation = qBound(0.0, saturation * 0.12, 0.28);
+    const qreal maxSaturation = qBound(0.0, saturation + 0.28, 1.0);
+    const int divisor = qMax(1, steps - 1);
+
+    colors.reserve(steps);
+    for (int i = 0; i < steps; ++i) {
+        const qreal amount = static_cast<qreal>(i) / static_cast<qreal>(divisor);
+        const qreal sat = minSaturation + ((maxSaturation - minSaturation) * amount);
+        const qreal toneValue = qBound(0.0, (value * 0.92) + (0.08 * amount), 1.0);
+        colors << QColor::fromHsvF(hue, sat, toneValue, alpha);
+    }
+
+    return colors;
+}
+
 bool isMaterialColorKey(const QString &key)
 {
     return key.startsWith(QStringLiteral("--color-material-"));
@@ -733,6 +798,13 @@ void ChromackPanel::buildUi()
     pickerTabLayout->setContentsMargins(0, 0, 0, 0);
     pickerTabLayout->setSpacing(0);
 
+    shadesTab_ = new QWidget(tabWidget_);
+    shadesTab_->setObjectName(QStringLiteral("shadesTab"));
+    auto *shadesLayout = new QVBoxLayout(shadesTab_);
+    shadesLayout->setContentsMargins(10, 10, 10, 10);
+    shadesLayout->setSpacing(8);
+    shadesLayout->setAlignment(Qt::AlignTop);
+
     paletteTab_ = new QWidget(tabWidget_);
     paletteTab_->setObjectName(QStringLiteral("paletteTab"));
     paletteLayout_ = new QVBoxLayout(paletteTab_);
@@ -926,7 +998,10 @@ void ChromackPanel::buildUi()
     paletteLayout_->addWidget(paletteStatusLabel_);
     paletteLayout_->addWidget(paletteScrollArea_, 1);
 
+    buildShadesRows();
+
     tabWidget_->addTab(pickerTab_, QStringLiteral("Color Picker"));
+    tabWidget_->addTab(shadesTab_, QStringLiteral("Shades"));
     tabWidget_->addTab(paletteTab_, QStringLiteral("Palette Generator"));
 
     panelLayout_->addWidget(tabWidget_, 1);
@@ -941,6 +1016,7 @@ void ChromackPanel::buildUi()
     connect(copyRgbaButton_, &QPushButton::clicked, this, &ChromackPanel::copyRgbaValue);
     connect(paletteGenerateButton_, &QPushButton::clicked, this, &ChromackPanel::generateTerminalPalette);
     connect(paletteInput_, &QLineEdit::returnPressed, this, &ChromackPanel::generateTerminalPalette);
+    connect(paletteInput_, &QLineEdit::editingFinished, this, &ChromackPanel::applyPaletteInputToActiveColor);
     connect(paletteInput_, &QLineEdit::textChanged, this, [this](const QString &value) {
         updatePaletteInputSwatch(parseColorValue(value.trimmed()));
     });
@@ -1150,11 +1226,10 @@ void ChromackPanel::buildPaletteRows()
                 return;
             }
             const QString value = paletteRows_.at(rowIndex).valueInput->text().trimmed();
-            const QColor color = parseColorValue(value);
-            if (!color.isValid()) {
+            if (value.isEmpty()) {
                 return;
             }
-            setActiveColor(color, true);
+            copyTextValue(value);
         });
 
         paletteGridLayout_->addWidget(row.nameLabel, rowIndex, 0);
@@ -1167,6 +1242,173 @@ void ChromackPanel::buildPaletteRows()
 
     if (paletteGridLayout_) {
         paletteGridLayout_->setColumnStretch(2, 1);
+    }
+}
+
+void ChromackPanel::buildShadesRows()
+{
+    if (!shadesTab_) {
+        return;
+    }
+
+    auto *shadesLayout = qobject_cast<QVBoxLayout *>(shadesTab_->layout());
+    if (!shadesLayout) {
+        return;
+    }
+
+    while (QLayoutItem *item = shadesLayout->takeAt(0)) {
+        if (item->widget()) {
+            item->widget()->deleteLater();
+        }
+        delete item;
+    }
+
+    shadeRows_.clear();
+
+    auto *subtitle = new QLabel(
+        QStringLiteral("Shades add black, tints add white, and tones adjust saturation with gray."),
+        shadesTab_);
+    subtitle->setObjectName(QStringLiteral("headerSubtitle"));
+    subtitle->setWordWrap(true);
+    shadesLayout->addWidget(subtitle);
+
+    auto *sectionsContainer = new QWidget(shadesTab_);
+    sectionsContainer->setObjectName(QStringLiteral("shadeSectionsContainer"));
+    auto *sectionsLayout = new QVBoxLayout(sectionsContainer);
+    sectionsLayout->setContentsMargins(0, 5, 0, 0);
+    sectionsLayout->setSpacing(8);
+
+    const QStringList titles = {
+        QStringLiteral("Shades"),
+        QStringLiteral("Tints"),
+        QStringLiteral("Tones")
+    };
+
+    for (int rowIndex = 0; rowIndex < titles.size(); ++rowIndex) {
+        ShadeScaleRow row;
+
+        auto *sectionFrame = new QFrame(sectionsContainer);
+        sectionFrame->setObjectName(QStringLiteral("shadeSection"));
+        auto *sectionLayout = new QVBoxLayout(sectionFrame);
+        sectionLayout->setContentsMargins(0, 0, 0, 0);
+        sectionLayout->setSpacing(6);
+
+        row.titleLabel = new QLabel(titles.at(rowIndex), sectionFrame);
+        row.titleLabel->setObjectName(QStringLiteral("sectionLabel"));
+        sectionLayout->addWidget(row.titleLabel);
+
+        row.statusLabel = new QLabel(sectionFrame);
+        row.statusLabel->setObjectName(QStringLiteral("headerSubtitle"));
+        row.statusLabel->setWordWrap(true);
+        sectionLayout->addWidget(row.statusLabel);
+
+        auto *swatchFrame = new QFrame(sectionFrame);
+        swatchFrame->setObjectName(QStringLiteral("shadeSwatchRow"));
+        auto *swatchLayout = new QGridLayout(swatchFrame);
+        swatchLayout->setContentsMargins(0, 0, 0, 0);
+        swatchLayout->setHorizontalSpacing(0);
+        swatchLayout->setVerticalSpacing(0);
+        row.swatchLayout = swatchLayout;
+
+        constexpr int kShadeSwatchRows = 2;
+        constexpr int kShadeSwatchColumns = 6;
+        constexpr int kShadeSwatchCount = kShadeSwatchRows * kShadeSwatchColumns;
+        for (int swatchIndex = 0; swatchIndex < kShadeSwatchCount; ++swatchIndex) {
+            auto *swatch = new QPushButton(swatchFrame);
+            swatch->setObjectName(QStringLiteral("shadeSwatch"));
+            swatch->setEnabled(false);
+            swatch->setFocusPolicy(Qt::NoFocus);
+            swatch->setProperty("shadeColor", QString());
+            const int swatchRow = swatchIndex / kShadeSwatchColumns;
+            const int swatchColumn = swatchIndex % kShadeSwatchColumns;
+            swatchLayout->addWidget(swatch, swatchRow, swatchColumn);
+            row.swatches.append(swatch);
+
+            connect(swatch, &QPushButton::clicked, this, [this, swatch]() {
+                const QString value = swatch->property("shadeColor").toString();
+                if (value.isEmpty()) {
+                    return;
+                }
+                copyTextValue(value);
+            });
+        }
+
+        for (int swatchColumn = 0; swatchColumn < kShadeSwatchColumns; ++swatchColumn) {
+            swatchLayout->setColumnStretch(swatchColumn, 1);
+        }
+        for (int swatchRow = 0; swatchRow < kShadeSwatchRows; ++swatchRow) {
+            swatchLayout->setRowStretch(swatchRow, 1);
+        }
+
+        sectionLayout->addWidget(swatchFrame);
+        sectionLayout->addStretch(1);
+        sectionsLayout->addWidget(sectionFrame, 1);
+        shadeRows_.append(row);
+    }
+
+    shadesLayout->addWidget(sectionsContainer, 1);
+    refreshShadesRows();
+}
+
+void ChromackPanel::refreshShadesRows()
+{
+    if (shadeRows_.size() < 3) {
+        return;
+    }
+
+    const QColor base = activeColor();
+    if (!base.isValid()) {
+        return;
+    }
+
+    const auto updateRow = [](const ShadeScaleRow &row, const QList<QColor> &colors) {
+        for (int i = 0; i < row.swatches.size(); ++i) {
+            QPushButton *swatch = row.swatches.at(i);
+            if (!swatch) {
+                continue;
+            }
+
+            if (i >= colors.size()) {
+                swatch->setEnabled(false);
+                swatch->setToolTip(QString());
+                swatch->setStyleSheet(QStringLiteral("background: transparent;"));
+                swatch->setProperty("shadeColor", QString());
+                continue;
+            }
+
+            const QString value = toCssColor(colors.at(i));
+            swatch->setEnabled(true);
+            swatch->setToolTip(value);
+            swatch->setStyleSheet(QStringLiteral("background:%1;").arg(value));
+            swatch->setProperty("shadeColor", value);
+        }
+    };
+
+    const QList<QColor> shades = buildShadeScale(base, shadeRows_.at(0).swatches.size());
+    const QList<QColor> tints = buildTintScale(base, shadeRows_.at(1).swatches.size());
+    const QList<QColor> tones = buildToneScale(base, shadeRows_.at(2).swatches.size());
+
+    updateRow(shadeRows_.at(0), shades);
+    updateRow(shadeRows_.at(1), tints);
+    updateRow(shadeRows_.at(2), tones);
+
+    if (!shades.isEmpty()) {
+        shadeRows_[0].statusLabel->setText(
+            QStringLiteral("%1 is darkest while %2 is closest to base.")
+                .arg(shades.first().name(QColor::HexRgb).toLower(),
+                     shades.last().name(QColor::HexRgb).toLower()));
+    }
+    if (!tints.isEmpty()) {
+        shadeRows_[1].statusLabel->setText(
+            QStringLiteral("%1 starts at base and %2 is lightest.")
+                .arg(tints.first().name(QColor::HexRgb).toLower(),
+                     tints.last().name(QColor::HexRgb).toLower()));
+    }
+    if (!tones.isEmpty()) {
+        shadeRows_[2].statusLabel->setText(
+            QStringLiteral("%1 is least saturated while %2 is most saturated.")
+                .arg(tones.first().name(QColor::HexRgb).toLower(),
+                     tones.last().name(QColor::HexRgb).toLower()));
     }
 }
 
@@ -1251,6 +1493,7 @@ void ChromackPanel::setActiveColorKey(const QString &key)
     syncingUi_ = false;
 
     updateColorPreview();
+    refreshShadesRows();
 }
 
 QColor ChromackPanel::colorForKey(const QString &key) const
@@ -1307,6 +1550,7 @@ void ChromackPanel::setActiveColor(const QColor &color, bool pushRecent)
     syncingUi_ = false;
 
     updateColorPreview();
+    refreshShadesRows();
     refreshMaterialButtons();
     refreshRecentButtons();
 }
@@ -1408,6 +1652,20 @@ void ChromackPanel::applyExternalColor(const QString &value)
     });
 }
 
+void ChromackPanel::applyPaletteInputToActiveColor()
+{
+    if (!paletteInput_) {
+        return;
+    }
+
+    const QColor parsed = parseColorValue(paletteInput_->text().trimmed());
+    if (!parsed.isValid()) {
+        return;
+    }
+
+    setActiveColor(parsed, false);
+}
+
 void ChromackPanel::generateTerminalPalette()
 {
     if (!paletteInput_ || !paletteStatusLabel_ || paletteRows_.isEmpty()) {
@@ -1422,6 +1680,7 @@ void ChromackPanel::generateTerminalPalette()
         return;
     }
 
+    setActiveColor(baseInput, false);
     updatePaletteInputSwatch(baseInput);
     const QString baseText = toCssColor(baseInput);
     const QList<QColor> terminalColors = buildTerminal24FromBase(baseInput);

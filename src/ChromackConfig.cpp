@@ -384,6 +384,14 @@ QWidget#paletteTab {
     border-bottom-right-radius: var(--content-radius);
 }
 
+QWidget#shadesTab {
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
 QScrollArea#paletteScrollArea {
     background: var(--palette-scroll-bg);
     border-top-left-radius: 0px;
@@ -581,6 +589,22 @@ QPushButton#paletteSwatch {
 }
 
 QPushButton#paletteSwatch:hover {
+    border-color: var(--text-color);
+}
+
+QFrame#shadeSwatchRow {
+    background: transparent;
+}
+
+QPushButton#shadeSwatch {
+    min-height: var(--input-height);
+    border: var(--control-border-width) solid var(--control-border-color);
+    border-radius: 0px;
+    margin: 0;
+    padding: 0;
+}
+
+QPushButton#shadeSwatch:hover {
     border-color: var(--text-color);
 }
 
@@ -921,6 +945,20 @@ QWidget#paletteTab {
 
     appendIfMissing(
         &style,
+        QStringLiteral("QWidget#shadesTab"),
+        QStringLiteral(R"(
+QWidget#shadesTab {
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+)")
+    );
+
+    appendIfMissing(
+        &style,
         QStringLiteral("QScrollArea#paletteScrollArea"),
         QStringLiteral(R"(
 QScrollArea#paletteScrollArea {
@@ -938,6 +976,28 @@ QWidget#paletteContainer {
     border-top-right-radius: 0px;
     border-bottom-left-radius: var(--content-radius);
     border-bottom-right-radius: var(--content-radius);
+}
+)")
+    );
+
+    appendIfMissing(
+        &style,
+        QStringLiteral("QPushButton#shadeSwatch"),
+        QStringLiteral(R"(
+QFrame#shadeSwatchRow {
+    background: transparent;
+}
+
+QPushButton#shadeSwatch {
+    min-height: var(--input-height);
+    border: var(--control-border-width) solid var(--control-border-color);
+    border-radius: 0px;
+    margin: 0;
+    padding: 0;
+}
+
+QPushButton#shadeSwatch:hover {
+    border-color: var(--text-color);
 }
 )")
     );
@@ -975,7 +1035,8 @@ QTabWidget#panelTabs::pane {
 
 QWidget#pickerViewport,
 QWidget#pickerContainer,
-QWidget#paletteTab {
+QWidget#paletteTab,
+QWidget#shadesTab {
     background: var(--content-bg);
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
