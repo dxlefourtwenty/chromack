@@ -407,18 +407,23 @@ QFrame#pickerTopFrame {
 
 QWidget#svPicker {
     min-height: var(--picker-height);
-    border: var(--control-border-width) solid var(--control-border-color);
+    border: none;
     border-radius: var(--picker-radius);
 }
 
 QSlider#hueSlider {
     min-width: var(--hue-width);
     max-width: var(--hue-width);
+    border: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
 }
 
 QSlider#hueSlider::groove:vertical {
-    border: var(--control-border-width) solid var(--control-border-color);
+    border: none;
     border-radius: 6px;
+    margin: 0;
     width: var(--hue-width);
     background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
                                 stop:0 #ff0000,
@@ -428,6 +433,13 @@ QSlider#hueSlider::groove:vertical {
                                 stop:0.67 #0000ff,
                                 stop:0.83 #ff00ff,
                                 stop:1 #ff0000);
+}
+
+QSlider#hueSlider::add-page:vertical,
+QSlider#hueSlider::sub-page:vertical {
+    border: none;
+    background: transparent;
+    margin: 0;
 }
 
 QSlider#hueSlider::handle:vertical {

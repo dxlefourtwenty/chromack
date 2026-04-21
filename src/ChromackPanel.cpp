@@ -74,9 +74,9 @@ protected:
         Q_UNUSED(event);
 
         QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing, true);
+        painter.setRenderHint(QPainter::Antialiasing, false);
 
-        QRect area = rect().adjusted(1, 1, -1, -1);
+        const QRect area = rect();
         if (!area.isValid()) {
             return;
         }
@@ -93,6 +93,7 @@ protected:
         blackGradient.setColorAt(1.0, QColor(0, 0, 0, 255));
         painter.fillRect(area, blackGradient);
 
+        painter.setRenderHint(QPainter::Antialiasing, true);
         painter.setPen(QPen(QColor(255, 255, 255), 2.0));
         const qreal x = area.left() + saturation_ * area.width();
         const qreal y = area.top() + (1.0 - value_) * area.height();
@@ -117,7 +118,7 @@ protected:
 private:
     void handlePointer(const QPointF &position)
     {
-        const QRect area = rect().adjusted(1, 1, -1, -1);
+        const QRect area = rect();
         if (!area.isValid()) {
             return;
         }
