@@ -323,3 +323,18 @@ QPushButton#paletteSwatch {
 QPushButton#paletteSwatch:hover {
     border-color: var(--text-color);
 }
+
+QPushButton#paletteInputSwatch {
+    min-width: var(--swatch-size);
+    max-width: var(--swatch-size);
+    min-height: var(--swatch-size);
+    max-height: var(--swatch-size);
+    border: var(--control-border-width) solid var(--control-border-color);
+    border-radius: var(--swatch-radius);
+    margin: 0;
+    padding: 0;
+}
+
+QPushButton#paletteInputSwatch:hover {
+    border-color: var(--text-color);
+}

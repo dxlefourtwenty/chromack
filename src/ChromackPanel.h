@@ -75,6 +75,7 @@ private:
     void loadRecentColors();
     void writeRecentColors();
     void generateTerminalPalette();
+    void updatePaletteInputSwatch(const QColor &color);
     void updatePanelGeometry(bool animated);
     QPoint openPosition() const;
     QPoint closedPosition() const;
@@ -155,6 +156,7 @@ private:
     QHBoxLayout *paletteInputLayout_ = nullptr;
     QLabel *paletteInputLabel_ = nullptr;
     QLineEdit *paletteInput_ = nullptr;
+    QPushButton *paletteInputSwatch_ = nullptr;
     QPushButton *paletteGenerateButton_ = nullptr;
     QLabel *paletteStatusLabel_ = nullptr;
     QFrame *paletteGridFrame_ = nullptr;

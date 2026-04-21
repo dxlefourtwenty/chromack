@@ -873,10 +873,18 @@ void ChromackPanel::buildUi()
     paletteInput_->setObjectName(QStringLiteral("paletteInput"));
     paletteInput_->setPlaceholderText(QStringLiteral("#5f6b7b or rgba(95, 107, 123, 1)"));
 
+    paletteInputSwatch_ = new QPushButton(paletteInputRow_);
+    paletteInputSwatch_->setObjectName(QStringLiteral("paletteInputSwatch"));
+    paletteInputSwatch_->setEnabled(false);
+    paletteInputSwatch_->setFocusPolicy(Qt::NoFocus);
+    paletteInputSwatch_->setToolTip(QString());
+    paletteInputSwatch_->setStyleSheet(QStringLiteral("background: transparent;"));
+
     paletteGenerateButton_ = new QPushButton(QStringLiteral("Generate"), paletteInputRow_);
     paletteGenerateButton_->setObjectName(QStringLiteral("paletteGenerateButton"));
 
     paletteInputLayout_->addWidget(paletteInputLabel_);
+    paletteInputLayout_->addWidget(paletteInputSwatch_);
     paletteInputLayout_->addWidget(paletteInput_, 1);
     paletteInputLayout_->addWidget(paletteGenerateButton_);
 
@@ -932,6 +940,9 @@ void ChromackPanel::buildUi()
     connect(copyRgbaButton_, &QPushButton::clicked, this, &ChromackPanel::copyRgbaValue);
     connect(paletteGenerateButton_, &QPushButton::clicked, this, &ChromackPanel::generateTerminalPalette);
     connect(paletteInput_, &QLineEdit::returnPressed, this, &ChromackPanel::generateTerminalPalette);
+    connect(paletteInput_, &QLineEdit::textChanged, this, [this](const QString &value) {
+        updatePaletteInputSwatch(parseColorValue(value.trimmed()));
+    });
 
     connect(hueSlider_, &QSlider::valueChanged, this, [this](int hue) {
         if (syncingUi_ || activeColorKey_.isEmpty()) {
@@ -1406,10 +1417,12 @@ void ChromackPanel::generateTerminalPalette()
     const QString rawInput = paletteInput_->text().trimmed();
     const QColor baseInput = parseColorValue(rawInput);
     if (!baseInput.isValid()) {
+        updatePaletteInputSwatch(QColor());
         paletteStatusLabel_->setText(QStringLiteral("Invalid color. Use hex or rgba."));
         return;
     }
 
+    updatePaletteInputSwatch(baseInput);
     const QString baseText = toCssColor(baseInput);
     const QList<QColor> terminalColors = buildTerminal24FromBase(baseInput);
 
@@ -1436,6 +1449,25 @@ void ChromackPanel::generateTerminalPalette()
     }
 
     paletteStatusLabel_->setText(QStringLiteral("Generated terminal 24 palette (+foreground/background) from %1").arg(baseText));
+}
+
+void ChromackPanel::updatePaletteInputSwatch(const QColor &color)
+{
+    if (!paletteInputSwatch_) {
+        return;
+    }
+
+    if (!color.isValid()) {
+        paletteInputSwatch_->setEnabled(false);
+        paletteInputSwatch_->setToolTip(QString());
+        paletteInputSwatch_->setStyleSheet(QStringLiteral("background: transparent;"));
+        return;
+    }
+
+    const QString cssColor = toCssColor(color);
+    paletteInputSwatch_->setEnabled(true);
+    paletteInputSwatch_->setToolTip(cssColor);
+    paletteInputSwatch_->setStyleSheet(QStringLiteral("background:%1;").arg(cssColor));
 }
 
 void ChromackPanel::applyConfig(const ChromackConfig &config)
