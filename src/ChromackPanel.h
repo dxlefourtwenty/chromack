@@ -74,8 +74,7 @@ private:
     void pushRecentColor(const QColor &color, bool persist);
     void loadRecentColors();
     void writeRecentColors();
-    void generatePastelPalette();
-    QColor runPastelTransform(const QStringList &args, bool *ok) const;
+    void generateTerminalPalette();
     void updatePanelGeometry(bool animated);
     QPoint openPosition() const;
     QPoint closedPosition() const;
@@ -114,12 +113,15 @@ private:
     QPushButton *closeButton_ = nullptr;
 
     QScrollArea *scrollArea_ = nullptr;
+    QScrollArea *paletteScrollArea_ = nullptr;
     QTabWidget *tabWidget_ = nullptr;
     QWidget *pickerTab_ = nullptr;
     QWidget *paletteTab_ = nullptr;
     QWidget *pickerContainer_ = nullptr;
+    QWidget *paletteContainer_ = nullptr;
     QVBoxLayout *pickerLayout_ = nullptr;
     QVBoxLayout *paletteLayout_ = nullptr;
+    QVBoxLayout *paletteContainerLayout_ = nullptr;
 
     QFrame *pickerTopFrame_ = nullptr;
     QHBoxLayout *pickerTopLayout_ = nullptr;

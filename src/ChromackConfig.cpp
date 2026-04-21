@@ -252,6 +252,7 @@ QString defaultStyleContents()
     --panel-bg: var(--color-surface);
     --panel-backdrop-bg: var(--color-panel-backdrop);
     --picker-backdrop-bg: var(--color-picker-backdrop);
+    --palette-scroll-bg: var(--content-bg);
 
     --border-color: var(--control-border-color);
     --text-color: var(--text-main);
@@ -383,6 +384,23 @@ QWidget#paletteTab {
     border-bottom-right-radius: var(--content-radius);
 }
 
+QScrollArea#paletteScrollArea {
+    background: var(--palette-scroll-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QWidget#paletteViewport,
+QWidget#paletteContainer {
+    background: var(--palette-scroll-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
 QFrame#pickerTopFrame {
     background: var(--picker-backdrop-bg);
 }
@@ -486,6 +504,7 @@ QFrame#opacityPreview {
 QLineEdit#hexInput,
 QLineEdit#rgbaInput,
 QLineEdit#paletteInput,
+QFrame#paletteInputRow QLineEdit#paletteInput,
 QLineEdit#paletteValueInput {
     min-height: var(--input-height);
     border: var(--control-border-width) solid var(--border-color);
@@ -520,7 +539,20 @@ QPushButton#paletteGenerateButton {
     padding: 0 10px;
 }
 
+QFrame#paletteInputRow QPushButton#paletteGenerateButton {
+    min-height: var(--input-height);
+    border-radius: var(--input-radius);
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 0 10px;
+}
+
 QPushButton#paletteGenerateButton:hover {
+    border-color: var(--text-color);
+}
+
+QFrame#paletteInputRow QPushButton#paletteGenerateButton:hover {
     border-color: var(--text-color);
 }
 
@@ -779,6 +811,23 @@ QScrollArea#pickerScrollArea {
     border-bottom-left-radius: var(--content-radius);
     border-bottom-right-radius: var(--content-radius);
 }
+
+QScrollArea#paletteScrollArea {
+    background: var(--palette-scroll-bg, var(--content-bg));
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QWidget#paletteViewport,
+QWidget#paletteContainer {
+    background: var(--palette-scroll-bg, var(--content-bg));
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
 )")
     );
 
@@ -787,6 +836,7 @@ QScrollArea#pickerScrollArea {
         QStringLiteral("QLineEdit#paletteInput"),
         QStringLiteral(R"(
 QLineEdit#paletteInput,
+QFrame#paletteInputRow QLineEdit#paletteInput,
 QLineEdit#paletteValueInput {
     min-height: var(--input-height);
     border: var(--control-border-width) solid var(--border-color);
@@ -811,7 +861,20 @@ QPushButton#paletteGenerateButton {
     padding: 0 10px;
 }
 
+QFrame#paletteInputRow QPushButton#paletteGenerateButton {
+    min-height: var(--input-height);
+    border-radius: var(--input-radius);
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 0 10px;
+}
+
 QPushButton#paletteGenerateButton:hover {
+    border-color: var(--text-color);
+}
+
+QFrame#paletteInputRow QPushButton#paletteGenerateButton:hover {
     border-color: var(--text-color);
 }
 )")
@@ -834,6 +897,29 @@ QTabWidget#panelTabs::tab-bar {
         QStringLiteral(R"(
 QWidget#paletteTab {
     background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+)")
+    );
+
+    appendIfMissing(
+        &style,
+        QStringLiteral("QScrollArea#paletteScrollArea"),
+        QStringLiteral(R"(
+QScrollArea#paletteScrollArea {
+    background: var(--palette-scroll-bg, var(--content-bg));
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QWidget#paletteViewport,
+QWidget#paletteContainer {
+    background: var(--palette-scroll-bg, var(--content-bg));
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     border-bottom-left-radius: var(--content-radius);
