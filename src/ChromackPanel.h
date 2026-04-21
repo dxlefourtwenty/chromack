@@ -170,6 +170,12 @@ private:
     QLineEdit *paletteInput_ = nullptr;
     QPushButton *paletteInputSwatch_ = nullptr;
     QPushButton *paletteGenerateButton_ = nullptr;
+    QFrame *shadesInputRow_ = nullptr;
+    QHBoxLayout *shadesInputLayout_ = nullptr;
+    QLabel *shadesInputLabel_ = nullptr;
+    QLineEdit *shadesInput_ = nullptr;
+    QPushButton *shadesInputSwatch_ = nullptr;
+    QPushButton *shadesGenerateButton_ = nullptr;
     QLabel *paletteStatusLabel_ = nullptr;
     QFrame *paletteGridFrame_ = nullptr;
     QGridLayout *paletteGridLayout_ = nullptr;

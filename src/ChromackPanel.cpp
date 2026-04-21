@@ -1032,6 +1032,14 @@ void ChromackPanel::buildUi()
     connect(paletteInput_, &QLineEdit::textChanged, this, [this](const QString &value) {
         updatePaletteInputSwatch(parseColorValue(value.trimmed()));
     });
+    if (shadesGenerateButton_ && shadesInput_) {
+        connect(shadesGenerateButton_, &QPushButton::clicked, this, &ChromackPanel::generateTerminalPalette);
+        connect(shadesInput_, &QLineEdit::returnPressed, this, &ChromackPanel::generateTerminalPalette);
+        connect(shadesInput_, &QLineEdit::editingFinished, this, &ChromackPanel::applyPaletteInputToActiveColor);
+        connect(shadesInput_, &QLineEdit::textChanged, this, [this](const QString &value) {
+            updatePaletteInputSwatch(parseColorValue(value.trimmed()));
+        });
+    }
 
     connect(hueSlider_, &QSlider::valueChanged, this, [this](int hue) {
         if (syncingUi_ || activeColorKey_.isEmpty()) {
@@ -1275,7 +1283,43 @@ void ChromackPanel::buildShadesRows()
         delete item;
     }
 
+    shadesInputRow_ = nullptr;
+    shadesInputLayout_ = nullptr;
+    shadesInputLabel_ = nullptr;
+    shadesInput_ = nullptr;
+    shadesInputSwatch_ = nullptr;
+    shadesGenerateButton_ = nullptr;
+
     shadeRows_.clear();
+
+    shadesInputRow_ = new QFrame(shadesTab_);
+    shadesInputRow_->setObjectName(QStringLiteral("paletteInputRow"));
+    shadesInputLayout_ = new QHBoxLayout(shadesInputRow_);
+    shadesInputLayout_->setContentsMargins(0, 0, 0, 0);
+    shadesInputLayout_->setSpacing(8);
+
+    shadesInputLabel_ = new QLabel(QStringLiteral("Base"), shadesInputRow_);
+    shadesInputLabel_->setObjectName(QStringLiteral("rowLabel"));
+
+    shadesInput_ = new QLineEdit(shadesInputRow_);
+    shadesInput_->setObjectName(QStringLiteral("paletteInput"));
+    shadesInput_->setPlaceholderText(QStringLiteral("#5f6b7b or rgba(95, 107, 123, 1)"));
+
+    shadesInputSwatch_ = new QPushButton(shadesInputRow_);
+    shadesInputSwatch_->setObjectName(QStringLiteral("paletteInputSwatch"));
+    shadesInputSwatch_->setEnabled(false);
+    shadesInputSwatch_->setFocusPolicy(Qt::NoFocus);
+    shadesInputSwatch_->setToolTip(QString());
+    shadesInputSwatch_->setStyleSheet(QStringLiteral("background: transparent;"));
+
+    shadesGenerateButton_ = new QPushButton(QStringLiteral("Generate"), shadesInputRow_);
+    shadesGenerateButton_->setObjectName(QStringLiteral("paletteGenerateButton"));
+
+    shadesInputLayout_->addWidget(shadesInputLabel_);
+    shadesInputLayout_->addWidget(shadesInputSwatch_);
+    shadesInputLayout_->addWidget(shadesInput_, 1);
+    shadesInputLayout_->addWidget(shadesGenerateButton_);
+    shadesLayout->addWidget(shadesInputRow_);
 
     auto *subtitle = new QLabel(
         QStringLiteral("Shades add black, tints add white, and tones adjust saturation with gray."),
@@ -1505,10 +1549,14 @@ void ChromackPanel::setActiveColorKey(const QString &key)
     if (paletteInput_ && !paletteInput_->hasFocus()) {
         paletteInput_->setText(hexInput_->text());
     }
+    if (shadesInput_ && !shadesInput_->hasFocus()) {
+        shadesInput_->setText(hexInput_->text());
+    }
 
     syncingUi_ = false;
 
     updateColorPreview();
+    updatePaletteInputSwatch(color);
     refreshShadesRows();
     if (activeColorCacheReady_) {
         writeActiveColorCache();
@@ -1566,10 +1614,14 @@ void ChromackPanel::setActiveColor(const QColor &color, bool pushRecent)
     if (paletteInput_ && !paletteInput_->hasFocus()) {
         paletteInput_->setText(hexInput_->text());
     }
+    if (shadesInput_ && !shadesInput_->hasFocus()) {
+        shadesInput_->setText(hexInput_->text());
+    }
 
     syncingUi_ = false;
 
     updateColorPreview();
+    updatePaletteInputSwatch(color);
     refreshShadesRows();
     refreshMaterialButtons();
     refreshRecentButtons();
@@ -1678,11 +1730,15 @@ void ChromackPanel::applyExternalColor(const QString &value)
 
 void ChromackPanel::applyPaletteInputToActiveColor()
 {
-    if (!paletteInput_) {
+    QLineEdit *sourceInput = qobject_cast<QLineEdit *>(sender());
+    if (!sourceInput) {
+        sourceInput = paletteInput_;
+    }
+    if (!sourceInput) {
         return;
     }
 
-    const QColor parsed = parseColorValue(paletteInput_->text().trimmed());
+    const QColor parsed = parseColorValue(sourceInput->text().trimmed());
     if (!parsed.isValid()) {
         return;
     }
@@ -1696,7 +1752,18 @@ void ChromackPanel::generateTerminalPalette()
         return;
     }
 
-    const QString rawInput = paletteInput_->text().trimmed();
+    QLineEdit *sourceInput = qobject_cast<QLineEdit *>(sender());
+    if (!sourceInput && sender() == paletteGenerateButton_) {
+        sourceInput = paletteInput_;
+    }
+    if (!sourceInput && sender() == shadesGenerateButton_) {
+        sourceInput = shadesInput_;
+    }
+    if (!sourceInput) {
+        sourceInput = paletteInput_;
+    }
+
+    const QString rawInput = sourceInput ? sourceInput->text().trimmed() : QString();
     const QColor baseInput = parseColorValue(rawInput);
     if (!baseInput.isValid()) {
         updatePaletteInputSwatch(QColor());
@@ -1736,21 +1803,24 @@ void ChromackPanel::generateTerminalPalette()
 
 void ChromackPanel::updatePaletteInputSwatch(const QColor &color)
 {
-    if (!paletteInputSwatch_) {
-        return;
-    }
+    const auto updateSwatch = [&color](QPushButton *swatch) {
+        if (!swatch) {
+            return;
+        }
+        if (!color.isValid()) {
+            swatch->setEnabled(false);
+            swatch->setToolTip(QString());
+            swatch->setStyleSheet(QStringLiteral("background: transparent;"));
+            return;
+        }
+        const QString cssColor = toCssColor(color);
+        swatch->setEnabled(true);
+        swatch->setToolTip(cssColor);
+        swatch->setStyleSheet(QStringLiteral("background:%1;").arg(cssColor));
+    };
 
-    if (!color.isValid()) {
-        paletteInputSwatch_->setEnabled(false);
-        paletteInputSwatch_->setToolTip(QString());
-        paletteInputSwatch_->setStyleSheet(QStringLiteral("background: transparent;"));
-        return;
-    }
-
-    const QString cssColor = toCssColor(color);
-    paletteInputSwatch_->setEnabled(true);
-    paletteInputSwatch_->setToolTip(cssColor);
-    paletteInputSwatch_->setStyleSheet(QStringLiteral("background:%1;").arg(cssColor));
+    updateSwatch(paletteInputSwatch_);
+    updateSwatch(shadesInputSwatch_);
 }
 
 void ChromackPanel::applyConfig(const ChromackConfig &config)
