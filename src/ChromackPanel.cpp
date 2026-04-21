@@ -588,37 +588,11 @@ void ChromackPanel::buildUi()
 
     panelLayout_->addWidget(scrollArea_, 1);
 
-    footerBar_ = new QFrame(panelRoot_);
-    footerBar_->setObjectName(QStringLiteral("footerBar"));
-    footerLayout_ = new QHBoxLayout(footerBar_);
-    footerLayout_->setContentsMargins(10, 8, 10, 8);
-    footerLayout_->setSpacing(8);
-
-    footerLabel_ = new QLabel(footerBar_);
-    footerLabel_->setObjectName(QStringLiteral("footerLabel"));
-
-    cancelButton_ = new QPushButton(QStringLiteral("Cancel"), footerBar_);
-    cancelButton_->setObjectName(QStringLiteral("cancelButton"));
-
-    copyButton_ = new QPushButton(QStringLiteral("Copy"), footerBar_);
-    copyButton_->setObjectName(QStringLiteral("copyButton"));
-
-    footerLayout_->addWidget(footerLabel_, 1);
-    footerLayout_->addWidget(cancelButton_);
-    footerLayout_->addWidget(copyButton_);
-
-    panelLayout_->addWidget(footerBar_);
-
     connect(closeButton_, &QPushButton::clicked, this, [this]() {
         writeColors();
         reloadConfiguration();
         closePanel();
     });
-    connect(cancelButton_, &QPushButton::clicked, this, [this]() {
-        reloadConfiguration();
-        closePanel();
-    });
-    connect(copyButton_, &QPushButton::clicked, this, &ChromackPanel::copyCurrentColor);
     connect(copyHexButton_, &QPushButton::clicked, this, &ChromackPanel::copyHexValue);
     connect(copyRgbaButton_, &QPushButton::clicked, this, &ChromackPanel::copyRgbaValue);
 
@@ -929,12 +903,6 @@ void ChromackPanel::updateColorPreview()
     subtitleLabel_->setText(QStringLiteral("%1 · %2").arg(keyName, css));
 }
 
-void ChromackPanel::copyCurrentColor()
-{
-    const QColor color = activeColor();
-    copyTextValue(toCssColor(color));
-}
-
 void ChromackPanel::copyHexValue()
 {
     copyTextValue(hexInput_ ? hexInput_->text().trimmed() : QString());
@@ -975,9 +943,7 @@ void ChromackPanel::applyConfig(const ChromackConfig &config)
     }
 
     titleLabel_->setText(config_.panel.title);
-    footerLabel_->setText(config_.panel.footerText);
     headerBar_->setVisible(config_.panel.showHeader);
-    footerBar_->setVisible(config_.panel.showFooter);
     if (scrollArea_) {
         if (config_.panel.scrollbar == QStringLiteral("none")) {
             scrollArea_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

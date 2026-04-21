@@ -22,9 +22,7 @@ struct ChromackPanelConfig {
     bool startOpen = false;
     bool closeOnEscape = true;
     bool showHeader = true;
-    bool showFooter = true;
     QString title = QStringLiteral("Chromack");
-    QString footerText = QStringLiteral("style color picker");
     QString scrollbar = QStringLiteral("auto");
 };
 

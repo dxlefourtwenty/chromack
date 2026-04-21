@@ -64,7 +64,6 @@ private:
     QColor activeColor() const;
     void setActiveColor(const QColor &color, bool pushRecent);
     void updateColorPreview();
-    void copyCurrentColor();
     void copyHexValue();
     void copyRgbaValue();
     void copyTextValue(const QString &value);
@@ -134,12 +133,6 @@ private:
     QLineEdit *rgbaInput_ = nullptr;
     QPushButton *copyHexButton_ = nullptr;
     QPushButton *copyRgbaButton_ = nullptr;
-
-    QFrame *footerBar_ = nullptr;
-    QHBoxLayout *footerLayout_ = nullptr;
-    QLabel *footerLabel_ = nullptr;
-    QPushButton *cancelButton_ = nullptr;
-    QPushButton *copyButton_ = nullptr;
 
     QList<ColorRow> colorRows_;
     QList<QPushButton *> recentButtons_;

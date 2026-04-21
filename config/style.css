@@ -9,7 +9,6 @@
     --section-gap: 10px;
 
     --header-radius: 12px;
-    --footer-radius: 12px;
     --content-radius: 12px;
     --section-title-size: 13px;
     --title-size: 17px;
@@ -41,7 +40,6 @@
     --control-border-color: var(--color-border);
 
     --header-bg: var(--color-surface-alt);
-    --footer-bg: var(--color-surface-alt);
     --content-bg: var(--color-surface-alt);
     --content-backdrop-bg: var(--color-content-backdrop);
     --panel-bg: var(--color-surface);
@@ -51,10 +49,6 @@
     --text-main: var(--color-text);
     --text-muted: var(--color-muted);
 
-    --button-cancel-bg: transparent;
-    --button-cancel-fg: var(--text-main);
-    --button-copy-bg: #cbbcff;
-    --button-copy-fg: #111111;
 }
 
 QWidget#chromackWindow {
@@ -178,8 +172,7 @@ QPushButton#recentSwatch {
     padding: 0;
 }
 
-QLabel#rowLabel,
-QLabel#footerLabel {
+QLabel#rowLabel {
     color: var(--text-main);
 }
 
@@ -217,29 +210,4 @@ QLineEdit#hexInput {
     padding: 0 10px;
     color: var(--text-main);
     background: var(--panel-bg);
-}
-
-QFrame#footerBar {
-    background: var(--footer-bg);
-    border-radius: var(--footer-radius);
-}
-
-QPushButton#cancelButton,
-QPushButton#copyButton {
-    min-height: var(--button-height);
-    border-radius: var(--button-radius);
-    padding: 0 var(--button-padding-x);
-    border: var(--control-border-width) solid transparent;
-    font-weight: 700;
-}
-
-QPushButton#cancelButton {
-    background: var(--button-cancel-bg);
-    color: var(--button-cancel-fg);
-    border-color: var(--control-border-color);
-}
-
-QPushButton#copyButton {
-    background: var(--button-copy-bg);
-    color: var(--button-copy-fg);
 }

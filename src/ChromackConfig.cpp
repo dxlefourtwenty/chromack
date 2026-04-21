@@ -101,10 +101,8 @@ QString defaultConfigContents()
         "start_open = false\n"
         "close_on_escape = true\n"
         "show_header = true\n"
-        "show_footer = true\n"
         "scrollbar = \"auto\"\n"
         "title = \"Chromack\"\n"
-        "footer_text = \"style color picker\"\n"
         "\n"
         "[animation]\n"
         "enabled = true\n"
@@ -211,7 +209,6 @@ QString defaultStyleContents()
     --section-gap: 10px;
 
     --header-radius: 12px;
-    --footer-radius: 12px;
     --content-radius: 12px;
     --section-title-size: 13px;
     --title-size: 17px;
@@ -243,7 +240,6 @@ QString defaultStyleContents()
     --control-border-color: var(--color-border);
 
     --header-bg: var(--color-surface-alt);
-    --footer-bg: var(--color-surface-alt);
     --content-bg: var(--color-surface-alt);
     --content-backdrop-bg: var(--color-content-backdrop);
     --panel-bg: var(--color-surface);
@@ -253,10 +249,6 @@ QString defaultStyleContents()
     --text-main: var(--color-text);
     --text-muted: var(--color-muted);
 
-    --button-cancel-bg: transparent;
-    --button-cancel-fg: var(--text-main);
-    --button-copy-bg: #cbbcff;
-    --button-copy-fg: #111111;
 }
 
 QWidget#chromackWindow {
@@ -380,8 +372,7 @@ QPushButton#recentSwatch {
     padding: 0;
 }
 
-QLabel#rowLabel,
-QLabel#footerLabel {
+QLabel#rowLabel {
     color: var(--text-main);
 }
 
@@ -438,30 +429,6 @@ QPushButton#inlineCopyButton:hover {
     border-color: var(--text-main);
 }
 
-QFrame#footerBar {
-    background: var(--footer-bg);
-    border-radius: var(--footer-radius);
-}
-
-QPushButton#cancelButton,
-QPushButton#copyButton {
-    min-height: var(--button-height);
-    border-radius: var(--button-radius);
-    padding: 0 var(--button-padding-x);
-    border: var(--control-border-width) solid transparent;
-    font-weight: 700;
-}
-
-QPushButton#cancelButton {
-    background: var(--button-cancel-bg);
-    color: var(--button-cancel-fg);
-    border-color: var(--control-border-color);
-}
-
-QPushButton#copyButton {
-    background: var(--button-copy-bg);
-    color: var(--button-copy-fg);
-}
 )");
 }
 
@@ -682,14 +649,10 @@ void loadConfig(const QString &path, ChromackConfig *config)
                 parseBool(value, &config->panel.closeOnEscape);
             } else if (key == QStringLiteral("show_header")) {
                 parseBool(value, &config->panel.showHeader);
-            } else if (key == QStringLiteral("show_footer")) {
-                parseBool(value, &config->panel.showFooter);
             } else if (key == QStringLiteral("scrollbar")) {
                 parseString(value, &config->panel.scrollbar);
             } else if (key == QStringLiteral("title")) {
                 parseString(value, &config->panel.title);
-            } else if (key == QStringLiteral("footer_text")) {
-                parseString(value, &config->panel.footerText);
             }
         } else if (section == QStringLiteral("animation")) {
             if (key == QStringLiteral("enabled")) {

@@ -17,10 +17,8 @@ focusable = true
 start_open = false
 close_on_escape = true
 show_header = true
-show_footer = true
 scrollbar = "auto"
 title = "Chromack"
-footer_text = "style color picker"
 
 [animation]
 enabled = true
