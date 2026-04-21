@@ -524,12 +524,18 @@ QPushButton#paletteGenerateButton:hover {
     border-color: var(--text-color);
 }
 
-QFrame#paletteSwatch {
+QPushButton#paletteSwatch {
     min-width: var(--preview-width);
     min-height: var(--preview-height);
     max-height: var(--preview-height);
     border-radius: var(--preview-radius);
     border: var(--control-border-width) solid var(--control-border-color);
+    margin: 0;
+    padding: 0;
+}
+
+QPushButton#paletteSwatch:hover {
+    border-color: var(--text-color);
 }
 
 )");

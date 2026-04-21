@@ -160,7 +160,7 @@ private:
 
     struct PaletteRow {
         QLabel *nameLabel = nullptr;
-        QFrame *swatch = nullptr;
+        QPushButton *swatch = nullptr;
         QLineEdit *valueInput = nullptr;
         QPushButton *copyButton = nullptr;
     };

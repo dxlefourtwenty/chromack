@@ -998,8 +998,10 @@ void ChromackPanel::buildPaletteRows()
         row.nameLabel = new QLabel(rowNames.at(rowIndex), paletteGridFrame_);
         row.nameLabel->setObjectName(QStringLiteral("rowLabel"));
 
-        row.swatch = new QFrame(paletteGridFrame_);
+        row.swatch = new QPushButton(paletteGridFrame_);
         row.swatch->setObjectName(QStringLiteral("paletteSwatch"));
+        row.swatch->setEnabled(false);
+        row.swatch->setStyleSheet(QStringLiteral("background: transparent;"));
 
         row.valueInput = new QLineEdit(paletteGridFrame_);
         row.valueInput->setObjectName(QStringLiteral("paletteValueInput"));
@@ -1018,6 +1020,18 @@ void ChromackPanel::buildPaletteRows()
             }
             const QString value = paletteRows_.at(rowIndex).valueInput->text().trimmed();
             copyTextValue(value);
+        });
+
+        connect(row.swatch, &QPushButton::clicked, this, [this, rowIndex]() {
+            if (rowIndex < 0 || rowIndex >= paletteRows_.size()) {
+                return;
+            }
+            const QString value = paletteRows_.at(rowIndex).valueInput->text().trimmed();
+            const QColor color = parseColorValue(value);
+            if (!color.isValid()) {
+                return;
+            }
+            setActiveColor(color, true);
         });
 
         paletteGridLayout_->addWidget(row.nameLabel, rowIndex, 0);
@@ -1359,6 +1373,8 @@ void ChromackPanel::generatePastelPalette()
         const QColor color = colors.at(i);
         const QString value = toCssColor(color);
         paletteRows_[i].swatch->setStyleSheet(QStringLiteral("background:%1;").arg(value));
+        paletteRows_[i].swatch->setToolTip(value);
+        paletteRows_[i].swatch->setEnabled(true);
         paletteRows_[i].valueInput->setText(value);
         paletteRows_[i].copyButton->setEnabled(true);
     }
