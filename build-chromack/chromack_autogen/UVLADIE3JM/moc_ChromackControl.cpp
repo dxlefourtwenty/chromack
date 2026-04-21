@@ -46,10 +46,13 @@ template <> constexpr inline auto ChromackControl::qt_create_metaobjectdata<qt_m
         "openRequested",
         "closeRequested",
         "toggleRequested",
+        "setColorRequested",
+        "value",
         "Reload",
         "Open",
         "Close",
-        "Toggle"
+        "Toggle",
+        "SetColor"
     };
 
     QtMocHelpers::UintData qt_methods {
@@ -61,14 +64,22 @@ template <> constexpr inline auto ChromackControl::qt_create_metaobjectdata<qt_m
         QtMocHelpers::SignalData<void()>(6, 4, QMC::AccessPublic, QMetaType::Void),
         // Signal 'toggleRequested'
         QtMocHelpers::SignalData<void()>(7, 4, QMC::AccessPublic, QMetaType::Void),
+        // Signal 'setColorRequested'
+        QtMocHelpers::SignalData<void(const QString &)>(8, 4, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::QString, 9 },
+        }}),
         // Slot 'Reload'
-        QtMocHelpers::SlotData<void()>(8, 4, QMC::AccessPublic, QMetaType::Void),
-        // Slot 'Open'
-        QtMocHelpers::SlotData<void()>(9, 4, QMC::AccessPublic, QMetaType::Void),
-        // Slot 'Close'
         QtMocHelpers::SlotData<void()>(10, 4, QMC::AccessPublic, QMetaType::Void),
-        // Slot 'Toggle'
+        // Slot 'Open'
         QtMocHelpers::SlotData<void()>(11, 4, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'Close'
+        QtMocHelpers::SlotData<void()>(12, 4, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'Toggle'
+        QtMocHelpers::SlotData<void()>(13, 4, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'SetColor'
+        QtMocHelpers::SlotData<void(const QString &)>(14, 4, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::QString, 9 },
+        }}),
     };
     QtMocHelpers::UintData qt_properties {
     };
@@ -100,10 +111,12 @@ void ChromackControl::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         case 1: _t->openRequested(); break;
         case 2: _t->closeRequested(); break;
         case 3: _t->toggleRequested(); break;
-        case 4: _t->Reload(); break;
-        case 5: _t->Open(); break;
-        case 6: _t->Close(); break;
-        case 7: _t->Toggle(); break;
+        case 4: _t->setColorRequested((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 5: _t->Reload(); break;
+        case 6: _t->Open(); break;
+        case 7: _t->Close(); break;
+        case 8: _t->Toggle(); break;
+        case 9: _t->SetColor((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
         default: ;
         }
     }
@@ -115,6 +128,8 @@ void ChromackControl::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int 
         if (QtMocHelpers::indexOfMethod<void (ChromackControl::*)()>(_a, &ChromackControl::closeRequested, 2))
             return;
         if (QtMocHelpers::indexOfMethod<void (ChromackControl::*)()>(_a, &ChromackControl::toggleRequested, 3))
+            return;
+        if (QtMocHelpers::indexOfMethod<void (ChromackControl::*)(const QString & )>(_a, &ChromackControl::setColorRequested, 4))
             return;
     }
 }
@@ -138,14 +153,14 @@ int ChromackControl::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 8)
+        if (_id < 10)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 8;
+        _id -= 10;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 8)
+        if (_id < 10)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 8;
+        _id -= 10;
     }
     return _id;
 }
@@ -172,5 +187,11 @@ void ChromackControl::closeRequested()
 void ChromackControl::toggleRequested()
 {
     QMetaObject::activate(this, &staticMetaObject, 3, nullptr);
+}
+
+// SIGNAL 4
+void ChromackControl::setColorRequested(const QString & _t1)
+{
+    QMetaObject::activate<void>(this, &staticMetaObject, 4, nullptr, _t1);
 }
 QT_WARNING_POP

@@ -400,10 +400,10 @@ CMakeFiles/chromack.dir/src/main.cpp.o: \
  /usr/include/c++/15.2.1/bits/fs_ops.h \
  /usr/include/qt6/QtCore/qdatetime.h /usr/include/qt6/QtCore/qcalendar.h \
  /usr/include/qt6/QtCore/qfile.h /usr/include/qt6/QtCore/qfileinfo.h \
- /usr/include/qt6/QtCore/qtimezone.h /usr/include/qt6/QtCore/QLockFile \
- /usr/include/qt6/QtCore/qlockfile.h \
+ /usr/include/qt6/QtCore/qtimezone.h /usr/include/qt6/QtCore/QIODevice \
+ /usr/include/qt6/QtCore/QLockFile /usr/include/qt6/QtCore/qlockfile.h \
  /usr/include/qt6/QtCore/QProcessEnvironment \
- /usr/include/qt6/QtCore/qprocess.h \
+ /usr/include/qt6/QtCore/qprocess.h /usr/include/qt6/QtCore/QTextStream \
  /usr/include/qt6/QtCore/QStandardPaths \
  /usr/include/qt6/QtCore/qstandardpaths.h \
  /home/dxle/builds/chromack/src/ChromackConfig.h \

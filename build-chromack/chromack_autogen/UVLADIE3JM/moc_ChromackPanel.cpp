@@ -44,6 +44,8 @@ template <> constexpr inline auto ChromackPanel::qt_create_metaobjectdata<qt_met
         "openPanel",
         "closePanel",
         "togglePanel",
+        "applyExternalColor",
+        "value",
         "applyConfig",
         "ChromackConfig",
         "config",
@@ -62,13 +64,17 @@ template <> constexpr inline auto ChromackPanel::qt_create_metaobjectdata<qt_met
         QtMocHelpers::SlotData<void()>(4, 2, QMC::AccessPublic, QMetaType::Void),
         // Slot 'togglePanel'
         QtMocHelpers::SlotData<void()>(5, 2, QMC::AccessPublic, QMetaType::Void),
+        // Slot 'applyExternalColor'
+        QtMocHelpers::SlotData<void(const QString &)>(6, 2, QMC::AccessPublic, QMetaType::Void, {{
+            { QMetaType::QString, 7 },
+        }}),
         // Slot 'applyConfig'
-        QtMocHelpers::SlotData<void(const ChromackConfig &)>(6, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { 0x80000000 | 7, 8 },
+        QtMocHelpers::SlotData<void(const ChromackConfig &)>(8, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { 0x80000000 | 9, 10 },
         }}),
         // Slot 'applyStyle'
-        QtMocHelpers::SlotData<void(const QString &, const QHash<QString,QString> &)>(9, 2, QMC::AccessPrivate, QMetaType::Void, {{
-            { QMetaType::QString, 10 }, { 0x80000000 | 11, 12 },
+        QtMocHelpers::SlotData<void(const QString &, const QHash<QString,QString> &)>(11, 2, QMC::AccessPrivate, QMetaType::Void, {{
+            { QMetaType::QString, 12 }, { 0x80000000 | 13, 14 },
         }}),
     };
     QtMocHelpers::UintData qt_properties {
@@ -97,8 +103,9 @@ void ChromackPanel::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _i
         case 1: _t->openPanel(); break;
         case 2: _t->closePanel(); break;
         case 3: _t->togglePanel(); break;
-        case 4: _t->applyConfig((*reinterpret_cast<std::add_pointer_t<ChromackConfig>>(_a[1]))); break;
-        case 5: _t->applyStyle((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<QHash<QString,QString>>>(_a[2]))); break;
+        case 4: _t->applyExternalColor((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1]))); break;
+        case 5: _t->applyConfig((*reinterpret_cast<std::add_pointer_t<ChromackConfig>>(_a[1]))); break;
+        case 6: _t->applyStyle((*reinterpret_cast<std::add_pointer_t<QString>>(_a[1])),(*reinterpret_cast<std::add_pointer_t<QHash<QString,QString>>>(_a[2]))); break;
         default: ;
         }
     }
@@ -123,14 +130,14 @@ int ChromackPanel::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 6)
+        if (_id < 7)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 6;
+        _id -= 7;
     }
     if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 6)
+        if (_id < 7)
             *reinterpret_cast<QMetaType *>(_a[0]) = QMetaType();
-        _id -= 6;
+        _id -= 7;
     }
     return _id;
 }

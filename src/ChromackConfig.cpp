@@ -104,6 +104,7 @@ QString defaultConfigContents()
         "scrollbar = \"auto\"\n"
         "title = \"Chromack\"\n"
         "eyedropper_command = \"~/bin/launch-colorpicker\"\n"
+        "reopen_delay_ms = 140\n"
         "\n"
         "[animation]\n"
         "enabled = true\n"
@@ -310,7 +311,7 @@ QPushButton#eyedropperButton {
 
 QPushButton#eyedropperButton {
     font-family: "Symbols Nerd Font Mono", var(--font-family);
-    font-size: 16px;
+    font-size: 10.67px;
     font-weight: 500;
 }
 
@@ -961,6 +962,8 @@ void loadConfig(const QString &path, ChromackConfig *config)
                 parseString(value, &config->panel.title);
             } else if (key == QStringLiteral("eyedropper_command")) {
                 parseString(value, &config->panel.eyedropperCommand);
+            } else if (key == QStringLiteral("reopen_delay_ms")) {
+                parseInt(value, &config->panel.reopenDelayMs);
             }
         } else if (section == QStringLiteral("animation")) {
             if (key == QStringLiteral("enabled")) {
@@ -1003,6 +1006,7 @@ void loadConfig(const QString &path, ChromackConfig *config)
     config->animation.durationMs = qMax(0, config->animation.durationMs);
     config->animation.fadeDurationMs = qMax(0, config->animation.fadeDurationMs);
     config->animation.slideDistance = qMax(0, config->animation.slideDistance);
+    config->panel.reopenDelayMs = qMax(0, config->panel.reopenDelayMs);
 
     const QString direction = config->animation.slideDirection.trimmed().toLower();
     if (direction != QStringLiteral("right") && direction != QStringLiteral("left") &&

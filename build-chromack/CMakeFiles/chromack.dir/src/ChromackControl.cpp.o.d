@@ -298,4 +298,4 @@ CMakeFiles/chromack.dir/src/ChromackControl.cpp.o: \
  /usr/include/qt6/QtCore/qobject_impl.h \
  /usr/include/qt6/QtCore/qbindingstorage.h /usr/include/c++/15.2.1/chrono \
  /usr/include/c++/15.2.1/bits/chrono.h /usr/include/c++/15.2.1/ratio \
- /usr/include/c++/15.2.1/ctime
+ /usr/include/c++/15.2.1/ctime /usr/include/qt6/QtCore/QString

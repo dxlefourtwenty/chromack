@@ -41,6 +41,7 @@ public slots:
     void openPanel();
     void closePanel();
     void togglePanel();
+    void applyExternalColor(const QString &value);
 
 protected:
     void resizeEvent(QResizeEvent *event) override;

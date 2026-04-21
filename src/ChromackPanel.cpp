@@ -1217,7 +1217,17 @@ void ChromackPanel::copyTextValue(const QString &value)
 void ChromackPanel::launchEyedropper()
 {
     const QString command = config_.panel.eyedropperCommand.trimmed();
-    if (!command.isEmpty()) {
+    if (command.isEmpty()) {
+        return;
+    }
+
+    setPanelOpen(false, true, true);
+
+    const int launchDelayMs = config_.animation.enabled
+        ? (qMax(80, config_.animation.durationMs + 30) + 10)
+        : 0;
+
+    const auto launchCommand = [command]() {
         const QStringList args = {
             QStringLiteral("-lc"),
             command
@@ -1230,11 +1240,34 @@ void ChromackPanel::launchEyedropper()
                                         << QStringLiteral("Chromack")
                                         << QStringLiteral("Failed to launch eyedropper command"));
         }
+    };
+
+    if (launchDelayMs <= 0) {
+        launchCommand();
+        return;
     }
 
+    QTimer::singleShot(launchDelayMs, this, launchCommand);
+}
+
+void ChromackPanel::applyExternalColor(const QString &value)
+{
+    const QColor parsed = parseColorFromPastelOutput(value);
+    if (!parsed.isValid()) {
+        return;
+    }
+
+    setActiveColor(parsed, true);
     writeColors();
-    reloadConfiguration();
-    closePanel();
+    const int reopenDelayMs = qMax(0, config_.panel.reopenDelayMs);
+    if (reopenDelayMs == 0) {
+        setPanelOpen(true, true, true);
+        return;
+    }
+
+    QTimer::singleShot(reopenDelayMs, this, [this]() {
+        setPanelOpen(true, true, true);
+    });
 }
 
 QColor ChromackPanel::runPastelTransform(const QStringList &args, bool *ok) const

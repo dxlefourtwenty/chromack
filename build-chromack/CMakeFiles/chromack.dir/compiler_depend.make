@@ -2122,6 +2122,7 @@ CMakeFiles/chromack.dir/src/ChromackControl.cpp.o: /home/dxle/builds/chromack/sr
   /usr/include/math.h \
   /usr/include/pthread.h \
   /usr/include/qt6/QtCore/QObject \
+  /usr/include/qt6/QtCore/QString \
   /usr/include/qt6/QtCore/q17memory.h \
   /usr/include/qt6/QtCore/q20bit.h \
   /usr/include/qt6/QtCore/q20functional.h \
@@ -3190,6 +3191,7 @@ CMakeFiles/chromack.dir/src/main.cpp.o: /home/dxle/builds/chromack/src/main.cpp 
   /usr/include/qt6/QtCore/QDir \
   /usr/include/qt6/QtCore/QFileSystemWatcher \
   /usr/include/qt6/QtCore/QHash \
+  /usr/include/qt6/QtCore/QIODevice \
   /usr/include/qt6/QtCore/QLockFile \
   /usr/include/qt6/QtCore/QObject \
   /usr/include/qt6/QtCore/QPointer \
@@ -3197,6 +3199,7 @@ CMakeFiles/chromack.dir/src/main.cpp.o: /home/dxle/builds/chromack/src/main.cpp 
   /usr/include/qt6/QtCore/QRect \
   /usr/include/qt6/QtCore/QStandardPaths \
   /usr/include/qt6/QtCore/QString \
+  /usr/include/qt6/QtCore/QTextStream \
   /usr/include/qt6/QtCore/q17memory.h \
   /usr/include/qt6/QtCore/q20bit.h \
   /usr/include/qt6/QtCore/q20functional.h \
@@ -3575,6 +3578,8 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o:
 /usr/lib/libXau.so.6:
 
 /usr/lib/libX11.so.6:
+
+/usr/lib/libQt6WaylandClient.so.6:
 
 /usr/include/c++/15.2.1/bits/locale_facets_nonio.tcc:
 
@@ -5012,8 +5017,6 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QEglFSKmsEglDeviceIntegrationPluginTargetsPrecheck.cmake:
 
-/usr/lib/libQt6WaylandClient.so.6:
-
 /usr/lib/cmake/Qt6Gui/Qt6QEglFSX11IntegrationPluginAdditionalTargetInfo.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QEglFSX11IntegrationPluginConfig.cmake:
@@ -5105,6 +5108,8 @@ CMakeFiles/4.3.1/CMakeSystem.cmake:
 /usr/lib/cmake/Qt6Gui/Qt6QICOPluginTargets.cmake:
 
 /usr/lib/cmake/Qt6Gui/Qt6QIbusPlatformInputContextPluginTargets-relwithdebinfo.cmake:
+
+/usr/include/qt6/QtCore/QIODevice:
 
 /usr/lib/libb2.so.1:
 

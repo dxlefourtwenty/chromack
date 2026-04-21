@@ -8,8 +8,10 @@
 #include <QDBusReply>
 #include <QDebug>
 #include <QDir>
+#include <QIODevice>
 #include <QLockFile>
 #include <QProcessEnvironment>
+#include <QTextStream>
 #include <QStandardPaths>
 
 #include "ChromackConfig.h"
@@ -41,6 +43,23 @@ int callControlMethod(const QDBusConnection &bus, const QString &method)
     }
 
     const QDBusReply<void> reply = interface.call(method);
+    if (!reply.isValid()) {
+        qCritical() << "Failed to call" << method << "on running chromack:" << reply.error().message();
+        return 1;
+    }
+
+    return 0;
+}
+
+int callControlMethodWithArgument(const QDBusConnection &bus, const QString &method, const QString &argument)
+{
+    QDBusInterface interface(kControlService, kControlPath, kControlInterface, bus);
+    if (!interface.isValid()) {
+        qCritical() << "No running chromack instance found.";
+        return 1;
+    }
+
+    const QDBusReply<void> reply = interface.call(method, argument);
     if (!reply.isValid()) {
         qCritical() << "Failed to call" << method << "on running chromack:" << reply.error().message();
         return 1;
@@ -123,11 +142,18 @@ int main(int argc, char *argv[])
                                    QStringLiteral("Close a running chromack panel."));
     QCommandLineOption toggleOption(QStringList() << QStringLiteral("toggle"),
                                     QStringLiteral("Toggle a running chromack panel."));
+    QCommandLineOption setColorOption(QStringList() << QStringLiteral("set-color"),
+                                      QStringLiteral("Set color on a running chromack instance."),
+                                      QStringLiteral("color"));
+    QCommandLineOption setColorStdinOption(QStringList() << QStringLiteral("set-color-stdin"),
+                                           QStringLiteral("Read color from stdin and set it on a running chromack instance."));
 
     parser.addOption(reloadOption);
     parser.addOption(openOption);
     parser.addOption(closeOption);
     parser.addOption(toggleOption);
+    parser.addOption(setColorOption);
+    parser.addOption(setColorStdinOption);
     parser.process(app);
 
     QDBusConnection bus = QDBusConnection::sessionBus();
@@ -147,6 +173,23 @@ int main(int argc, char *argv[])
     }
     if (parser.isSet(toggleOption)) {
         return callControlMethod(bus, QStringLiteral("Toggle"));
+    }
+    if (parser.isSet(setColorOption)) {
+        const QString color = parser.value(setColorOption).trimmed();
+        if (color.isEmpty()) {
+            qCritical() << "--set-color requires a non-empty color value.";
+            return 1;
+        }
+        return callControlMethodWithArgument(bus, QStringLiteral("SetColor"), color);
+    }
+    if (parser.isSet(setColorStdinOption)) {
+        QTextStream in(stdin, QIODevice::ReadOnly);
+        const QString color = in.readAll().trimmed();
+        if (color.isEmpty()) {
+            qCritical() << "--set-color-stdin requires piped color input.";
+            return 1;
+        }
+        return callControlMethodWithArgument(bus, QStringLiteral("SetColor"), color);
     }
 
     QLockFile instanceLock(instanceLockPath());
@@ -176,6 +219,7 @@ int main(int argc, char *argv[])
     QObject::connect(&control, &ChromackControl::openRequested, &panel, &ChromackPanel::openPanel);
     QObject::connect(&control, &ChromackControl::closeRequested, &panel, &ChromackPanel::closePanel);
     QObject::connect(&control, &ChromackControl::toggleRequested, &panel, &ChromackPanel::togglePanel);
+    QObject::connect(&control, &ChromackControl::setColorRequested, &panel, &ChromackPanel::applyExternalColor);
 
     return app.exec();
 }

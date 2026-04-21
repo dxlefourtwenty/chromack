@@ -24,3 +24,8 @@ void ChromackControl::Toggle()
 {
     emit toggleRequested();
 }
+
+void ChromackControl::SetColor(const QString &value)
+{
+    emit setColorRequested(value);
+}

@@ -25,6 +25,7 @@ struct ChromackPanelConfig {
     QString title = QStringLiteral("Chromack");
     QString scrollbar = QStringLiteral("auto");
     QString eyedropperCommand = QStringLiteral("~/bin/launch-colorpicker");
+    int reopenDelayMs = 140;
 };
 
 struct ChromackAnimationConfig {
