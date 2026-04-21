@@ -771,8 +771,12 @@ void ChromackPanel::buildUi()
 
     closeButton_ = new QPushButton(QStringLiteral("X"), headerBar_);
     closeButton_->setObjectName(QStringLiteral("closeButton"));
+    closeButton_->setMouseTracking(true);
+    closeButton_->setAttribute(Qt::WA_Hover, true);
     eyedropperButton_ = new QPushButton(headerBar_);
     eyedropperButton_->setObjectName(QStringLiteral("eyedropperButton"));
+    eyedropperButton_->setMouseTracking(true);
+    eyedropperButton_->setAttribute(Qt::WA_Hover, true);
     eyedropperButton_->setText(QString::fromUtf8(u8""));
     eyedropperButton_->setToolTip(QStringLiteral("Launch color picker"));
 

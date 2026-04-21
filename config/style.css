@@ -108,6 +108,18 @@ QPushButton#eyedropperButton {
     font-weight: 500;
 }
 
+QPushButton#eyedropperButton:hover {
+    background: var(--color-surface-alt);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+QPushButton#closeButton:hover {
+    background: var(--color-surface-alt);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
 QScrollArea#pickerScrollArea {
     background: var(--content-backdrop-bg);
     border-top-left-radius: 0px;
