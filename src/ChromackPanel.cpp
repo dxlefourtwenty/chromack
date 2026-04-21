@@ -136,6 +136,38 @@ private:
 
 namespace {
 
+constexpr int kMaterialSwatchGapPx = 2;
+constexpr int kMaterialGridColumns = 16;
+constexpr int kMaterialGridRows = 3;
+constexpr int kRecentColorSlots = kMaterialGridColumns;
+
+QString materialPaletteKey(int index)
+{
+    return QStringLiteral("--color-material-%1").arg(index + 1, 2, 10, QLatin1Char('0'));
+}
+
+const QStringList &materialPaletteColors()
+{
+    static const QStringList colors = {
+        QStringLiteral("#e53935"), QStringLiteral("#d81b60"), QStringLiteral("#8e24aa"), QStringLiteral("#5e35b1"),
+        QStringLiteral("#3949ab"), QStringLiteral("#1e88e5"), QStringLiteral("#039be5"), QStringLiteral("#00acc1"),
+        QStringLiteral("#00897b"), QStringLiteral("#43a047"), QStringLiteral("#7cb342"), QStringLiteral("#c0ca33"),
+        QStringLiteral("#fdd835"), QStringLiteral("#ffb300"), QStringLiteral("#fb8c00"), QStringLiteral("#f4511e"),
+        QStringLiteral("#e53935"), QStringLiteral("#c62828"),
+        QStringLiteral("#d81b60"), QStringLiteral("#8e24aa"), QStringLiteral("#5e35b1"), QStringLiteral("#3949ab"),
+        QStringLiteral("#1e88e5"), QStringLiteral("#039be5"), QStringLiteral("#00acc1"), QStringLiteral("#00897b"),
+        QStringLiteral("#43a047"), QStringLiteral("#7cb342"), QStringLiteral("#9e9d24"), QStringLiteral("#fbc02d"),
+        QStringLiteral("#ffa000"), QStringLiteral("#fb8c00"), QStringLiteral("#f4511e"), QStringLiteral("#e53935"),
+        QStringLiteral("#ad1457"), QStringLiteral("#880e4f"),
+        QStringLiteral("#6a1b9a"), QStringLiteral("#4527a0"), QStringLiteral("#283593"), QStringLiteral("#1565c0"),
+        QStringLiteral("#0277bd"), QStringLiteral("#00838f"), QStringLiteral("#00695c"), QStringLiteral("#2e7d32"),
+        QStringLiteral("#558b2f"), QStringLiteral("#9e9d24"), QStringLiteral("#f9a825"), QStringLiteral("#ff8f00"),
+        QStringLiteral("#ef6c00"), QStringLiteral("#d84315"), QStringLiteral("#bf360c"), QStringLiteral("#f5f5f5"),
+        QStringLiteral("#e0e0e0"), QStringLiteral("#bdbdbd")
+    };
+    return colors;
+}
+
 QEasingCurve::Type easingFromName(const QString &name)
 {
     const QString normalized = name.trimmed().toLower();
@@ -260,6 +292,34 @@ QString toRgbaColor(const QColor &color)
         .arg(color.green())
         .arg(color.blue())
         .arg(alpha);
+}
+
+QList<QPair<QString, QString>> extractNonColorVariables(const QString &text)
+{
+    QList<QPair<QString, QString>> variables;
+    static const QRegularExpression pattern(
+        QStringLiteral(R"((--[A-Za-z0-9_-]+)\s*:\s*([^;{}]+);)"));
+
+    QHash<QString, QString> valuesByKey;
+    QStringList keyOrder;
+    QRegularExpressionMatchIterator it = pattern.globalMatch(text);
+    while (it.hasNext()) {
+        const QRegularExpressionMatch match = it.next();
+        const QString key = match.captured(1).trimmed();
+        if (key.startsWith(QStringLiteral("--color-"))) {
+            continue;
+        }
+        if (!valuesByKey.contains(key)) {
+            keyOrder.append(key);
+        }
+        valuesByKey.insert(key, match.captured(2).trimmed());
+    }
+
+    for (const QString &key : keyOrder) {
+        variables.append({key, valuesByKey.value(key)});
+    }
+
+    return variables;
 }
 
 bool copyToWaylandClipboard(const QString &text)
@@ -437,8 +497,8 @@ void ChromackPanel::buildUi()
     materialGridFrame_->setObjectName(QStringLiteral("materialGridFrame"));
     materialGridLayout_ = new QGridLayout(materialGridFrame_);
     materialGridLayout_->setContentsMargins(0, 0, 0, 0);
-    materialGridLayout_->setHorizontalSpacing(6);
-    materialGridLayout_->setVerticalSpacing(6);
+    materialGridLayout_->setHorizontalSpacing(kMaterialSwatchGapPx);
+    materialGridLayout_->setVerticalSpacing(kMaterialSwatchGapPx);
 
     recentLabel_ = new QLabel(QStringLiteral("Recent Colors"), pickerContainer_);
     recentLabel_->setObjectName(QStringLiteral("sectionLabel"));
@@ -447,7 +507,7 @@ void ChromackPanel::buildUi()
     recentRowFrame_->setObjectName(QStringLiteral("recentRowFrame"));
     recentRowLayout_ = new QHBoxLayout(recentRowFrame_);
     recentRowLayout_->setContentsMargins(0, 0, 0, 0);
-    recentRowLayout_->setSpacing(8);
+    recentRowLayout_->setSpacing(kMaterialSwatchGapPx);
 
     opacityRow_ = new QFrame(pickerContainer_);
     opacityRow_->setObjectName(QStringLiteral("opacityRow"));
@@ -537,27 +597,23 @@ void ChromackPanel::buildUi()
     cancelButton_ = new QPushButton(QStringLiteral("Cancel"), footerBar_);
     cancelButton_->setObjectName(QStringLiteral("cancelButton"));
 
-    applyButton_ = new QPushButton(QStringLiteral("Apply"), footerBar_);
-    applyButton_->setObjectName(QStringLiteral("applyButton"));
-
     copyButton_ = new QPushButton(QStringLiteral("Copy"), footerBar_);
     copyButton_->setObjectName(QStringLiteral("copyButton"));
 
     footerLayout_->addWidget(footerLabel_, 1);
     footerLayout_->addWidget(cancelButton_);
-    footerLayout_->addWidget(applyButton_);
     footerLayout_->addWidget(copyButton_);
 
     panelLayout_->addWidget(footerBar_);
 
-    connect(closeButton_, &QPushButton::clicked, this, &ChromackPanel::closePanel);
-    connect(cancelButton_, &QPushButton::clicked, this, [this]() {
+    connect(closeButton_, &QPushButton::clicked, this, [this]() {
+        writeColors();
         reloadConfiguration();
         closePanel();
     });
-    connect(applyButton_, &QPushButton::clicked, this, [this]() {
-        writeColors();
+    connect(cancelButton_, &QPushButton::clicked, this, [this]() {
         reloadConfiguration();
+        closePanel();
     });
     connect(copyButton_, &QPushButton::clicked, this, &ChromackPanel::copyCurrentColor);
     connect(copyHexButton_, &QPushButton::clicked, this, &ChromackPanel::copyHexValue);
@@ -648,9 +704,28 @@ void ChromackPanel::buildColorRows()
         }
     }
 
+    const QStringList materialColors = materialPaletteColors();
+    const int targetMaterialSlots = kMaterialGridColumns * kMaterialGridRows;
+    int paletteIndex = 0;
+    while (orderedKeys.size() < targetMaterialSlots && paletteIndex < materialColors.size()) {
+        const QString key = materialPaletteKey(paletteIndex);
+        ++paletteIndex;
+        if (orderedKeys.contains(key)) {
+            continue;
+        }
+        orderedKeys.append(key);
+        if (!styleVariables_.contains(key)) {
+            styleVariables_.insert(key, materialColors.at(paletteIndex - 1));
+        }
+    }
+
+    if (orderedKeys.size() > targetMaterialSlots) {
+        orderedKeys = orderedKeys.mid(0, targetMaterialSlots);
+    }
+
     int row = 0;
     int col = 0;
-    const int maxCols = 14;
+    const int maxCols = kMaterialGridColumns;
     for (const QString &key : orderedKeys) {
         auto colorRow = ColorRow {};
         colorRow.key = key;
@@ -721,21 +796,25 @@ void ChromackPanel::refreshRecentButtons()
 
     recentButtons_.clear();
 
-    for (const QColor &color : recentColors_) {
+    for (int i = 0; i < kRecentColorSlots; ++i) {
         auto *button = new QPushButton(recentRowFrame_);
         button->setObjectName(QStringLiteral("recentSwatch"));
-        button->setToolTip(toCssColor(color));
-        button->setStyleSheet(QStringLiteral("background:%1;").arg(toCssColor(color)));
-
-        connect(button, &QPushButton::clicked, this, [this, color]() {
-            setActiveColor(color, false);
-        });
+        if (i < recentColors_.size()) {
+            const QColor color = recentColors_.at(i);
+            button->setToolTip(toCssColor(color));
+            button->setStyleSheet(QStringLiteral("background:%1;").arg(toCssColor(color)));
+            connect(button, &QPushButton::clicked, this, [this, color]() {
+                setActiveColor(color, false);
+            });
+        } else {
+            button->setEnabled(false);
+            button->setToolTip(QString());
+            button->setStyleSheet(QStringLiteral("background:transparent;"));
+        }
 
         recentRowLayout_->addWidget(button);
         recentButtons_.append(button);
     }
-
-    recentRowLayout_->addStretch(1);
 }
 
 void ChromackPanel::setActiveColorKey(const QString &key)
@@ -811,7 +890,7 @@ void ChromackPanel::setActiveColor(const QColor &color, bool pushRecent)
             recentColors_.removeAt(existingIndex);
         }
         recentColors_.prepend(color);
-        while (recentColors_.size() > 8) {
+        while (recentColors_.size() > kRecentColorSlots) {
             recentColors_.removeLast();
         }
     }
@@ -972,8 +1051,8 @@ QPoint ChromackPanel::openPosition() const
 {
     QScreen *screen = targetScreen();
     const QRect geo = screen ? screen->geometry() : QRect(0, 0, 1920, 1080);
-    const int rightMarginPx = 20;
-    const int minX = geo.left() + config_.layout.leftMargin;
+    const int rightMarginPx = qMax(0, config_.layout.rightMargin);
+    const int minX = geo.left() + qMax(0, config_.layout.leftMargin);
     const int x = qMax(minX, geo.right() - rightMarginPx - width() + 1);
     const int y = geo.top() + ((geo.height() - height()) / 2);
 
@@ -1144,7 +1223,11 @@ void ChromackPanel::updatePanelGeometry(bool animated)
         220,
         geo.width() - (config_.layout.leftMargin + config_.layout.rightMargin));
     const int panelWidth = qBound(220, config_.layout.width, maxPanelWidth);
-    const int panelHeight = qMax(220, geo.height() / 2);
+    const int maxPanelHeight = qMax(
+        220,
+        geo.height() - (config_.layout.topMargin + config_.layout.bottomMargin));
+    const int desiredPanelHeight = (geo.height() * 55) / 100;
+    const int panelHeight = qBound(config_.layout.minimumHeight, desiredPanelHeight, maxPanelHeight);
 
     setFixedWidth(panelWidth);
     setFixedHeight(panelHeight);
@@ -1286,6 +1369,13 @@ void ChromackPanel::writeColors()
     const QFileInfo info(file.fileName());
     QDir().mkpath(info.absolutePath());
 
+    QString existingText;
+    if (file.exists() && file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        existingText = QString::fromUtf8(file.readAll());
+        file.close();
+    }
+    const QList<QPair<QString, QString>> preservedVariables = extractNonColorVariables(existingText);
+
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         return;
     }
@@ -1296,6 +1386,13 @@ void ChromackPanel::writeColors()
     for (const ColorRow &row : colorRows_) {
         const QColor color = colorForKey(row.key);
         stream << "    " << row.key << ": " << toCssColor(color) << ";\n";
+    }
+
+    if (!preservedVariables.isEmpty()) {
+        stream << '\n';
+        for (const auto &entry : preservedVariables) {
+            stream << "    " << entry.first << ": " << entry.second << ";\n";
+        }
     }
 
     stream << "}\n";

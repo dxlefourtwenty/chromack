@@ -130,6 +130,8 @@ QString defaultColorsContents()
         "    --color-accent: #ffd166;\n"
         "    --color-surface: #111827;\n"
         "    --color-surface-alt: #1f2937;\n"
+        "    --color-panel-backdrop: transparent;\n"
+        "    --color-picker-backdrop: var(--color-surface);\n"
         "    --color-border: #374151;\n"
         "    --color-text: #f3f4f6;\n"
         "    --color-muted: #9ca3af;\n"
@@ -163,10 +165,10 @@ QString defaultStyleContents()
 
     --swatch-size: 24px;
     --swatch-radius: 6px;
-    --swatch-gap: 6px;
+    --swatch-gap: 2px;
 
-    --recent-swatch-size: 30px;
-    --recent-swatch-radius: 8px;
+    --recent-swatch-size: 24px;
+    --recent-swatch-radius: 6px;
 
     --input-height: 34px;
     --input-radius: 8px;
@@ -186,12 +188,12 @@ QString defaultStyleContents()
     --footer-bg: var(--color-surface-alt);
     --content-bg: var(--color-surface-alt);
     --panel-bg: var(--color-surface);
+    --panel-backdrop-bg: var(--color-panel-backdrop);
+    --picker-backdrop-bg: var(--color-picker-backdrop);
 
     --text-main: var(--color-text);
     --text-muted: var(--color-muted);
 
-    --button-apply-bg: #cbbcff;
-    --button-apply-fg: #111111;
     --button-cancel-bg: transparent;
     --button-cancel-fg: var(--text-main);
     --button-copy-bg: #cbbcff;
@@ -199,7 +201,7 @@ QString defaultStyleContents()
 }
 
 QWidget#chromackWindow {
-    background: transparent;
+    background: var(--panel-backdrop-bg);
 }
 
 QWidget#chromackWindow,
@@ -246,7 +248,7 @@ QWidget#pickerContainer {
 }
 
 QFrame#pickerTopFrame {
-    background: transparent;
+    background: var(--picker-backdrop-bg);
 }
 
 QWidget#svPicker {
@@ -295,6 +297,7 @@ QPushButton#materialSwatch {
     max-height: var(--swatch-size);
     border: var(--control-border-width) solid var(--control-border-color);
     border-radius: var(--swatch-radius);
+    margin: 0;
     padding: 0;
 }
 
@@ -309,6 +312,7 @@ QPushButton#recentSwatch {
     max-height: var(--recent-swatch-size);
     border: var(--control-border-width) solid var(--control-border-color);
     border-radius: var(--recent-swatch-radius);
+    margin: 0;
     padding: 0;
 }
 
@@ -376,7 +380,6 @@ QFrame#footerBar {
 }
 
 QPushButton#cancelButton,
-QPushButton#applyButton,
 QPushButton#copyButton {
     min-height: var(--button-height);
     border-radius: var(--button-radius);
@@ -389,11 +392,6 @@ QPushButton#cancelButton {
     background: var(--button-cancel-bg);
     color: var(--button-cancel-fg);
     border-color: var(--control-border-color);
-}
-
-QPushButton#applyButton {
-    background: var(--button-apply-bg);
-    color: var(--button-apply-fg);
 }
 
 QPushButton#copyButton {

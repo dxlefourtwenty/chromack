@@ -138,7 +138,6 @@ private:
     QHBoxLayout *footerLayout_ = nullptr;
     QLabel *footerLabel_ = nullptr;
     QPushButton *cancelButton_ = nullptr;
-    QPushButton *applyButton_ = nullptr;
     QPushButton *copyButton_ = nullptr;
 
     QList<ColorRow> colorRows_;
