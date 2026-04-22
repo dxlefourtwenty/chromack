@@ -2022,6 +2022,7 @@ void ChromackPanel::setActiveColorKey(const QString &key)
 
     updateColorPreview();
     updatePaletteInputSwatch(color);
+    refreshPaletteRows(color, false);
     refreshShadesRows();
     refreshTheoryRows();
     if (activeColorCacheReady_) {
@@ -2091,6 +2092,7 @@ void ChromackPanel::setActiveColor(const QColor &color, bool pushRecent)
 
     updateColorPreview();
     updatePaletteInputSwatch(color);
+    refreshPaletteRows(color, false);
     refreshShadesRows();
     refreshTheoryRows();
     refreshMaterialButtons();
@@ -2269,13 +2271,22 @@ void ChromackPanel::generateTerminalPalette()
 
     setActiveColor(baseInput, false);
     updatePaletteInputSwatch(baseInput);
-    const QString baseText = toCssColor(baseInput);
-    const QList<QColor> terminalColors = buildTerminal24FromBase(baseInput);
+    refreshPaletteRows(baseInput, true);
+}
 
-    const QColor background = blendColors(terminalColors.first(), baseInput, 0.20);
-    QColor foreground = blendColors(terminalColors.at(15), baseInput, 0.08);
+void ChromackPanel::refreshPaletteRows(const QColor &baseColor, bool updateStatusLabel)
+{
+    if (!baseColor.isValid() || paletteRows_.isEmpty()) {
+        return;
+    }
+
+    const QString baseText = toCssColor(baseColor);
+    const QList<QColor> terminalColors = buildTerminal24FromBase(baseColor);
+
+    const QColor background = blendColors(terminalColors.first(), baseColor, 0.20);
+    QColor foreground = blendColors(terminalColors.at(15), baseColor, 0.08);
     if (relativeLuminance(background) > 0.42) {
-        foreground = blendColors(terminalColors.first(), baseInput, 0.18);
+        foreground = blendColors(terminalColors.first(), baseColor, 0.18);
     }
 
     QList<QColor> colors = {
@@ -2294,7 +2305,9 @@ void ChromackPanel::generateTerminalPalette()
         paletteRows_[i].copyButton->setEnabled(true);
     }
 
-    paletteStatusLabel_->setText(QStringLiteral("Generated 24-base palette from %1").arg(baseText));
+    if (paletteStatusLabel_) {
+        paletteStatusLabel_->setText(QStringLiteral("Generated 24-base palette from %1").arg(baseText));
+    }
 }
 
 void ChromackPanel::updatePaletteInputSwatch(const QColor &color)

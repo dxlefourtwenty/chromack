@@ -87,6 +87,7 @@ private:
     void writeActiveColorCache();
     void applyPaletteInputToActiveColor();
     void generateTerminalPalette();
+    void refreshPaletteRows(const QColor &baseColor, bool updateStatusLabel);
     void updatePaletteInputSwatch(const QColor &color);
     void updatePanelGeometry(bool animated);
     QPoint openPosition() const;
