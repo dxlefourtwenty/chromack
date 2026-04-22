@@ -1217,7 +1217,7 @@ void ChromackPanel::buildUi()
     paletteInputLayout_->addWidget(paletteGenerateButton_);
 
     paletteStatusLabel_ = new QLabel(
-        QStringLiteral("Generate 24-based color palette from a base hex or rgba value"),
+        QStringLiteral("Generate 24-based color palette from a base hex or rgba value."),
         paletteTab_);
     paletteStatusLabel_->setObjectName(QStringLiteral("headerSubtitle"));
     paletteStatusLabel_->setWordWrap(true);
@@ -1714,7 +1714,7 @@ void ChromackPanel::buildTheoryRows()
     theoryInputLayout_->addWidget(theoryGenerateButton_);
     layout->addWidget(theoryInputRow_);
 
-    theoryStatusLabel_ = new QLabel(QStringLiteral("Generate color theory values"), theoryTab_);
+    theoryStatusLabel_ = new QLabel(QStringLiteral("Generate complementary values based on color theory."), theoryTab_);
     theoryStatusLabel_->setObjectName(QStringLiteral("headerSubtitle"));
     theoryStatusLabel_->setWordWrap(true);
     layout->addWidget(theoryStatusLabel_);
@@ -1789,7 +1789,7 @@ void ChromackPanel::buildTheoryRows()
         theorySchemeRows_.append(row);
     }
 
-    theoryContentLayout->addSpacing(10);
+    theoryContentLayout->addSpacing(16);
     auto *wheelTitle = new QLabel(QStringLiteral("Color Wheel"), theoryContentFrame);
     wheelTitle->setObjectName(QStringLiteral("sectionLabel"));
     theoryContentLayout->addWidget(wheelTitle);
@@ -1927,7 +1927,7 @@ void ChromackPanel::refreshTheoryRows()
     }
 
     if (theoryStatusLabel_) {
-        theoryStatusLabel_->setText(QStringLiteral("Generate color theory values"));
+        theoryStatusLabel_->setText(QStringLiteral("Generate complementary values based on color theory."));
     }
 }
 

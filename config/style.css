@@ -408,7 +408,7 @@ QPushButton#theorySwatch:hover {
 }
 
 QWidget#theoryWheel {
-    min-height: 315px;
+    min-height: 378px;
     border: none;
     border-radius: 0px;
     background: transparent;
