@@ -1286,8 +1286,8 @@ void ChromackPanel::buildUi()
         });
     }
     if (theoryGenerateButton_ && theoryInput_) {
-        connect(theoryGenerateButton_, &QPushButton::clicked, this, &ChromackPanel::applyPaletteInputToActiveColor);
-        connect(theoryInput_, &QLineEdit::returnPressed, this, &ChromackPanel::applyPaletteInputToActiveColor);
+        connect(theoryGenerateButton_, &QPushButton::clicked, this, &ChromackPanel::generateTerminalPalette);
+        connect(theoryInput_, &QLineEdit::returnPressed, this, &ChromackPanel::generateTerminalPalette);
         connect(theoryInput_, &QLineEdit::editingFinished, this, &ChromackPanel::applyPaletteInputToActiveColor);
         connect(theoryInput_, &QLineEdit::textChanged, this, [this](const QString &value) {
             updatePaletteInputSwatch(parseColorValue(value.trimmed()));
@@ -1360,6 +1360,9 @@ void ChromackPanel::buildUi()
 
         setActiveColor(parsed, false);
     });
+
+    connect(hexInput_, &QLineEdit::returnPressed, this, &ChromackPanel::generateTerminalPalette);
+    connect(rgbaInput_, &QLineEdit::returnPressed, this, &ChromackPanel::generateTerminalPalette);
 }
 
 void ChromackPanel::buildColorRows()
@@ -2183,6 +2186,7 @@ void ChromackPanel::applyExternalColor(const QString &value)
     }
 
     setActiveColor(parsed, true);
+    generateTerminalPalette();
     writeColors();
     const int reopenDelayMs = qMax(0, config_.panel.reopenDelayMs);
     if (reopenDelayMs == 0) {
@@ -2201,6 +2205,8 @@ void ChromackPanel::applyPaletteInputToActiveColor()
     if (!sourceInput) {
         if (sender() == theoryGenerateButton_) {
             sourceInput = theoryInput_;
+        } else if (sender() == shadesGenerateButton_) {
+            sourceInput = shadesInput_;
         } else {
             sourceInput = paletteInput_;
         }
@@ -2230,8 +2236,27 @@ void ChromackPanel::generateTerminalPalette()
     if (!sourceInput && sender() == shadesGenerateButton_) {
         sourceInput = shadesInput_;
     }
+    if (!sourceInput && sender() == theoryGenerateButton_) {
+        sourceInput = theoryInput_;
+    }
+    if (!sourceInput && sender() == hexInput_) {
+        sourceInput = hexInput_;
+    }
+    if (!sourceInput && sender() == rgbaInput_) {
+        sourceInput = rgbaInput_;
+    }
     if (!sourceInput) {
-        sourceInput = paletteInput_;
+        if (theoryInput_ && theoryInput_->hasFocus()) {
+            sourceInput = theoryInput_;
+        } else if (shadesInput_ && shadesInput_->hasFocus()) {
+            sourceInput = shadesInput_;
+        } else if (hexInput_ && hexInput_->hasFocus()) {
+            sourceInput = hexInput_;
+        } else if (rgbaInput_ && rgbaInput_->hasFocus()) {
+            sourceInput = rgbaInput_;
+        } else {
+            sourceInput = paletteInput_;
+        }
     }
 
     const QString rawInput = sourceInput ? sourceInput->text().trimmed() : QString();
