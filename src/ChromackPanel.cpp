@@ -2051,17 +2051,17 @@ void ChromackPanel::setActiveColorKey(const QString &key)
         saturation = 0.0;
     }
     svPicker_->setSaturationValue(saturation, color.valueF());
-    const QString cssValue = toCssColor(color);
-    hexInput_->setText(toHexInputColor(color));
+    const QString hexValue = toHexInputColor(color);
+    hexInput_->setText(hexValue);
     rgbaInput_->setText(toRgbaColor(color));
     if (paletteInput_ && !paletteInput_->hasFocus()) {
-        paletteInput_->setText(cssValue);
+        paletteInput_->setText(hexValue);
     }
     if (shadesInput_ && !shadesInput_->hasFocus()) {
-        shadesInput_->setText(cssValue);
+        shadesInput_->setText(hexValue);
     }
     if (theoryInput_ && !theoryInput_->hasFocus()) {
-        theoryInput_->setText(cssValue);
+        theoryInput_->setText(hexValue);
     }
 
     syncingUi_ = false;
@@ -2122,17 +2122,17 @@ void ChromackPanel::setActiveColor(const QColor &color, bool pushRecent)
         saturation = 0.0;
     }
     svPicker_->setSaturationValue(saturation, color.valueF());
-    const QString cssValue = toCssColor(color);
-    hexInput_->setText(toHexInputColor(color));
+    const QString hexValue = toHexInputColor(color);
+    hexInput_->setText(hexValue);
     rgbaInput_->setText(toRgbaColor(color));
     if (paletteInput_ && !paletteInput_->hasFocus()) {
-        paletteInput_->setText(cssValue);
+        paletteInput_->setText(hexValue);
     }
     if (shadesInput_ && !shadesInput_->hasFocus()) {
-        shadesInput_->setText(cssValue);
+        shadesInput_->setText(hexValue);
     }
     if (theoryInput_ && !theoryInput_->hasFocus()) {
-        theoryInput_->setText(cssValue);
+        theoryInput_->setText(hexValue);
     }
 
     syncingUi_ = false;

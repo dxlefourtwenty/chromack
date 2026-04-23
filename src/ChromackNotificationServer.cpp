@@ -1,4 +1,4 @@
-#include "NotificationServer.h"
+#include "ChromackNotificationServer.h"
 
 NotificationServer::NotificationServer(QObject *parent)
     : QObject(parent)
