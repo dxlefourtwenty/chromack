@@ -445,6 +445,44 @@ QColor parseColorValue(const QString &value)
     return parsed;
 }
 
+bool hasExplicitAlphaComponent(const QString &value)
+{
+    const QString trimmed = value.trimmed();
+    if (trimmed.isEmpty()) {
+        return false;
+    }
+
+    static const QRegularExpression hexWithAlphaPattern(
+        QStringLiteral(R"(^#[0-9A-Fa-f]{8}$)"));
+    if (hexWithAlphaPattern.match(trimmed).hasMatch()) {
+        return true;
+    }
+
+    static const QRegularExpression rgbaPattern(
+        QStringLiteral(
+            R"(^rgba\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})(?:\s*,\s*([0-9]*\.?[0-9]+)\s*)?\)$)"),
+        QRegularExpression::CaseInsensitiveOption);
+    const QRegularExpressionMatch rgbaMatch = rgbaPattern.match(trimmed);
+    if (!rgbaMatch.hasMatch()) {
+        return false;
+    }
+
+    return !rgbaMatch.captured(4).isEmpty();
+}
+
+QString toHexInputColor(const QColor &color)
+{
+    if (!color.isValid()) {
+        return QStringLiteral("#000000");
+    }
+
+    if (color.alpha() >= 255) {
+        return color.name(QColor::HexRgb).toLower();
+    }
+
+    return color.name(QColor::HexArgb).toLower();
+}
+
 QColor parseColorFromPastelOutput(QString output)
 {
     static const QRegularExpression ansiSequence(QStringLiteral(R"(\x1B\[[0-9;]*[A-Za-z])"));
@@ -1093,6 +1131,7 @@ void ChromackPanel::buildUi()
     hueSlider_ = new SeekOnClickSlider(Qt::Vertical, pickerTopFrame_);
     hueSlider_->setObjectName(QStringLiteral("hueSlider"));
     hueSlider_->setRange(0, 359);
+    hueSlider_->setInvertedAppearance(true);
     hueSlider_->setValue(120);
 
     pickerTopLayout_->addWidget(svPicker_, 1);
@@ -1334,13 +1373,14 @@ void ChromackPanel::buildUi()
             return;
         }
 
-        QColor parsed = parseColorValue(hexInput_->text());
+        const QString rawValue = hexInput_->text().trimmed();
+        QColor parsed = parseColorValue(rawValue);
         if (!parsed.isValid()) {
             updateColorPreview();
             return;
         }
 
-        if (parsed.alpha() == 255) {
+        if (!hasExplicitAlphaComponent(rawValue)) {
             parsed.setAlpha(opacitySlider_->value());
         }
 
@@ -1352,10 +1392,15 @@ void ChromackPanel::buildUi()
             return;
         }
 
-        const QColor parsed = parseColorValue(rgbaInput_->text());
+        const QString rawValue = rgbaInput_->text().trimmed();
+        QColor parsed = parseColorValue(rawValue);
         if (!parsed.isValid()) {
             updateColorPreview();
             return;
+        }
+
+        if (!hasExplicitAlphaComponent(rawValue)) {
+            parsed.setAlpha(opacitySlider_->value());
         }
 
         setActiveColor(parsed, false);
@@ -2006,16 +2051,17 @@ void ChromackPanel::setActiveColorKey(const QString &key)
         saturation = 0.0;
     }
     svPicker_->setSaturationValue(saturation, color.valueF());
-    hexInput_->setText(color.name(QColor::HexRgb).toLower());
+    const QString cssValue = toCssColor(color);
+    hexInput_->setText(toHexInputColor(color));
     rgbaInput_->setText(toRgbaColor(color));
     if (paletteInput_ && !paletteInput_->hasFocus()) {
-        paletteInput_->setText(hexInput_->text());
+        paletteInput_->setText(cssValue);
     }
     if (shadesInput_ && !shadesInput_->hasFocus()) {
-        shadesInput_->setText(hexInput_->text());
+        shadesInput_->setText(cssValue);
     }
     if (theoryInput_ && !theoryInput_->hasFocus()) {
-        theoryInput_->setText(hexInput_->text());
+        theoryInput_->setText(cssValue);
     }
 
     syncingUi_ = false;
@@ -2076,16 +2122,17 @@ void ChromackPanel::setActiveColor(const QColor &color, bool pushRecent)
         saturation = 0.0;
     }
     svPicker_->setSaturationValue(saturation, color.valueF());
-    hexInput_->setText(color.name(QColor::HexRgb).toLower());
+    const QString cssValue = toCssColor(color);
+    hexInput_->setText(toHexInputColor(color));
     rgbaInput_->setText(toRgbaColor(color));
     if (paletteInput_ && !paletteInput_->hasFocus()) {
-        paletteInput_->setText(hexInput_->text());
+        paletteInput_->setText(cssValue);
     }
     if (shadesInput_ && !shadesInput_->hasFocus()) {
-        shadesInput_->setText(hexInput_->text());
+        shadesInput_->setText(cssValue);
     }
     if (theoryInput_ && !theoryInput_->hasFocus()) {
-        theoryInput_->setText(hexInput_->text());
+        theoryInput_->setText(cssValue);
     }
 
     syncingUi_ = false;
@@ -2217,9 +2264,14 @@ void ChromackPanel::applyPaletteInputToActiveColor()
         return;
     }
 
-    const QColor parsed = parseColorValue(sourceInput->text().trimmed());
+    const QString rawInput = sourceInput->text().trimmed();
+    QColor parsed = parseColorValue(rawInput);
     if (!parsed.isValid()) {
         return;
+    }
+
+    if (!hasExplicitAlphaComponent(rawInput)) {
+        parsed.setAlpha(opacitySlider_->value());
     }
 
     setActiveColor(parsed, false);
@@ -2262,11 +2314,15 @@ void ChromackPanel::generateTerminalPalette()
     }
 
     const QString rawInput = sourceInput ? sourceInput->text().trimmed() : QString();
-    const QColor baseInput = parseColorValue(rawInput);
+    QColor baseInput = parseColorValue(rawInput);
     if (!baseInput.isValid()) {
         updatePaletteInputSwatch(QColor());
         paletteStatusLabel_->setText(QStringLiteral("Invalid color. Use hex or rgba."));
         return;
+    }
+
+    if (!hasExplicitAlphaComponent(rawInput)) {
+        baseInput.setAlpha(opacitySlider_->value());
     }
 
     setActiveColor(baseInput, false);
