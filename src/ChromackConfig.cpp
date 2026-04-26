@@ -1274,6 +1274,10 @@ void ChromackConfigLoader::reload()
             defaultMaterialContents() + QStringLiteral("\n") + defaultStyleContents();
     }
 
+    watchedStyleFiles_ = QStringList(visited.cbegin(), visited.cend());
+    watchedStyleFiles_.removeDuplicates();
+    watchedStyleFiles_.sort();
+
     styleVariables_ = extractVariables(resolvedText);
     QString flatStyle = stripVariableDeclarations(resolvedText);
     flatStyle = ensurePaletteAndTabStyle(flatStyle);
@@ -1344,7 +1348,10 @@ void ChromackConfigLoader::refreshWatchers()
     const QString colorsFile = resolvedColorsPath(config_);
     const QString materialFile = resolvedMaterialPath(config_);
 
-    const QStringList files = {configFile, styleFile, colorsFile, materialFile};
+    QStringList files = {configFile, styleFile, colorsFile, materialFile};
+    files.append(watchedStyleFiles_);
+    files.removeDuplicates();
+
     QStringList dirs = {
         QFileInfo(configFile).absolutePath(),
         QFileInfo(styleFile).absolutePath(),

@@ -301,8 +301,9 @@ CMakeFiles/chromack.dir/src/ChromackConfig.cpp.o: \
  /usr/include/c++/15.2.1/bits/chrono.h /usr/include/c++/15.2.1/ratio \
  /usr/include/c++/15.2.1/ctime /usr/include/qt6/QtCore/QHash \
  /usr/include/qt6/QtCore/qhash.h /usr/include/qt6/QtCore/QObject \
- /usr/include/qt6/QtCore/QString /usr/include/qt6/QtCore/QDir \
- /usr/include/qt6/QtCore/qdir.h /usr/include/qt6/QtCore/qdirlisting.h \
+ /usr/include/qt6/QtCore/QString /usr/include/qt6/QtCore/QStringList \
+ /usr/include/qt6/QtCore/QDir /usr/include/qt6/QtCore/qdir.h \
+ /usr/include/qt6/QtCore/qdirlisting.h \
  /usr/include/qt6/QtCore/qfiledevice.h \
  /usr/include/qt6/QtCore/qiodevice.h /usr/include/qt6/QtCore/qspan.h \
  /usr/include/c++/15.2.1/cassert /usr/include/qt6/QtCore/q20iterator.h \

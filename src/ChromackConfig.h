@@ -4,6 +4,7 @@
 #include <QHash>
 #include <QObject>
 #include <QString>
+#include <QStringList>
 
 struct ChromackLayoutConfig {
     QString anchor = QStringLiteral("top-right");
@@ -79,5 +80,6 @@ private:
     QFileSystemWatcher watcher_;
     ChromackConfig config_;
     QString styleSheet_;
+    QStringList watchedStyleFiles_;
     QHash<QString, QString> styleVariables_;
 };

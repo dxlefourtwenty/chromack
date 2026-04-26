@@ -403,14 +403,42 @@ CMakeFiles/chromack.dir/src/main.cpp.o: \
  /usr/include/qt6/QtCore/qtimezone.h /usr/include/qt6/QtCore/QIODevice \
  /usr/include/qt6/QtCore/QLockFile /usr/include/qt6/QtCore/qlockfile.h \
  /usr/include/qt6/QtCore/QProcessEnvironment \
- /usr/include/qt6/QtCore/qprocess.h /usr/include/qt6/QtCore/QTextStream \
+ /usr/include/qt6/QtCore/qprocess.h \
+ /usr/include/qt6/QtCore/QSocketNotifier \
+ /usr/include/qt6/QtCore/qsocketnotifier.h \
+ /usr/include/qt6/QtCore/QTextStream \
  /usr/include/qt6/QtCore/QStandardPaths \
- /usr/include/qt6/QtCore/qstandardpaths.h \
+ /usr/include/qt6/QtCore/qstandardpaths.h /usr/include/c++/15.2.1/csignal \
+ /usr/include/signal.h /usr/include/bits/signum-generic.h \
+ /usr/include/bits/signum-arch.h /usr/include/bits/types/sig_atomic_t.h \
+ /usr/include/bits/types/siginfo_t.h /usr/include/bits/types/__sigval_t.h \
+ /usr/include/bits/siginfo-arch.h /usr/include/bits/siginfo-consts.h \
+ /usr/include/bits/siginfo-consts-arch.h \
+ /usr/include/bits/types/sigval_t.h /usr/include/bits/types/sigevent_t.h \
+ /usr/include/bits/sigevent-consts.h /usr/include/bits/sigaction.h \
+ /usr/include/bits/sigcontext.h /usr/include/bits/types/stack_t.h \
+ /usr/include/sys/ucontext.h /usr/include/bits/sigstack.h \
+ /usr/include/bits/sigstksz.h /usr/include/unistd.h \
+ /usr/include/bits/posix_opt.h /usr/include/bits/environments.h \
+ /usr/include/bits/confname.h /usr/include/bits/getopt_posix.h \
+ /usr/include/bits/getopt_core.h /usr/include/bits/unistd_ext.h \
+ /usr/include/linux/close_range.h /usr/include/bits/ss_flags.h \
+ /usr/include/bits/types/struct_sigstack.h /usr/include/bits/sigthread.h \
+ /usr/include/bits/signal_ext.h /usr/include/fcntl.h \
+ /usr/include/bits/fcntl.h /usr/include/bits/fcntl-linux.h \
+ /usr/include/bits/types/struct_iovec.h /usr/include/linux/falloc.h \
+ /usr/include/linux/openat2.h /usr/include/bits/openat2.h \
+ /usr/include/bits/stat.h /usr/include/bits/struct_stat.h \
+ /usr/include/sys/socket.h /usr/include/bits/socket.h \
+ /usr/include/bits/socket_type.h /usr/include/bits/sockaddr.h \
+ /usr/include/asm/socket.h /usr/include/asm-generic/socket.h \
+ /usr/include/asm/sockios.h /usr/include/asm-generic/sockios.h \
+ /usr/include/bits/types/struct_osockaddr.h \
  /home/dxle/builds/chromack/src/ChromackConfig.h \
  /usr/include/qt6/QtCore/QFileSystemWatcher \
  /usr/include/qt6/QtCore/qfilesystemwatcher.h \
  /usr/include/qt6/QtCore/QHash /usr/include/qt6/QtCore/QObject \
- /usr/include/qt6/QtCore/QString \
+ /usr/include/qt6/QtCore/QString /usr/include/qt6/QtCore/QStringList \
  /home/dxle/builds/chromack/src/ChromackControl.h \
  /home/dxle/builds/chromack/src/ChromackPanel.h \
  /usr/include/qt6/QtGui/QColor /usr/include/qt6/QtCore/QPointer \

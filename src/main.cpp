@@ -11,8 +11,15 @@
 #include <QIODevice>
 #include <QLockFile>
 #include <QProcessEnvironment>
+#include <QSocketNotifier>
 #include <QTextStream>
 #include <QStandardPaths>
+
+#include <cerrno>
+#include <csignal>
+#include <fcntl.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 #include "ChromackConfig.h"
 #include "ChromackControl.h"
@@ -23,6 +30,47 @@ namespace {
 constexpr auto kControlService = "org.dxle.chromack";
 constexpr auto kControlPath = "/org/dxle/chromack";
 constexpr auto kControlInterface = "org.dxle.chromack.Control";
+int signalSockets[2] = {-1, -1};
+
+void handleReloadSignal(int)
+{
+    const char byte = 1;
+    if (signalSockets[0] != -1) {
+        const ssize_t ignored = ::write(signalSockets[0], &byte, sizeof(byte));
+        Q_UNUSED(ignored);
+    }
+}
+
+void setNonBlocking(int fd)
+{
+    const int flags = ::fcntl(fd, F_GETFL, 0);
+    if (flags != -1) {
+        ::fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+    }
+}
+
+bool installReloadSignalHandler()
+{
+    if (::socketpair(AF_UNIX, SOCK_STREAM, 0, signalSockets) != 0) {
+        qCritical() << "Failed to create reload signal socketpair:" << qt_error_string(errno);
+        return false;
+    }
+
+    setNonBlocking(signalSockets[0]);
+    setNonBlocking(signalSockets[1]);
+
+    struct sigaction action {};
+    action.sa_handler = handleReloadSignal;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = SA_RESTART;
+
+    if (::sigaction(SIGUSR1, &action, nullptr) != 0) {
+        qCritical() << "Failed to install SIGUSR1 reload handler:" << qt_error_string(errno);
+        return false;
+    }
+
+    return true;
+}
 
 QString instanceLockPath()
 {
@@ -236,6 +284,16 @@ int main(int argc, char *argv[])
     ChromackConfigLoader configLoader;
     ChromackPanel panel(&configLoader);
     ChromackControl control;
+    if (!installReloadSignalHandler()) {
+        return 1;
+    }
+    QSocketNotifier reloadNotifier(signalSockets[1], QSocketNotifier::Read);
+    QObject::connect(&reloadNotifier, &QSocketNotifier::activated, &panel, [&panel]() {
+        char buffer[64];
+        while (::read(signalSockets[1], buffer, sizeof(buffer)) > 0) {
+        }
+        panel.reloadConfiguration();
+    });
 
     if (!registerService(bus,
                          kControlService,

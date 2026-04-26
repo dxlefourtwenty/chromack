@@ -351,6 +351,7 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: \
  /usr/include/qt6/QtCore/QFileSystemWatcher \
  /usr/include/qt6/QtCore/qfilesystemwatcher.h \
  /usr/include/qt6/QtCore/QObject /usr/include/qt6/QtCore/QString \
+ /usr/include/qt6/QtCore/QStringList \
  /usr/include/qt6/QtWidgets/QApplication \
  /usr/include/qt6/QtWidgets/qapplication.h \
  /usr/include/qt6/QtCore/qcoreapplication.h \

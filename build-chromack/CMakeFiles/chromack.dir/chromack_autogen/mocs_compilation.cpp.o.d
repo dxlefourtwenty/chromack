@@ -302,7 +302,8 @@ CMakeFiles/chromack.dir/chromack_autogen/mocs_compilation.cpp.o: \
  /usr/include/c++/15.2.1/bits/chrono.h /usr/include/c++/15.2.1/ratio \
  /usr/include/c++/15.2.1/ctime /usr/include/qt6/QtCore/QHash \
  /usr/include/qt6/QtCore/qhash.h /usr/include/qt6/QtCore/QObject \
- /usr/include/qt6/QtCore/QString /usr/include/qt6/QtCore/qtmochelpers.h \
+ /usr/include/qt6/QtCore/QString /usr/include/qt6/QtCore/QStringList \
+ /usr/include/qt6/QtCore/qtmochelpers.h \
  /usr/include/qt6/QtCore/qtmocconstants.h \
  /usr/include/qt6/QtCore/q20algorithm.h \
  /home/dxle/builds/chromack/build-chromack/chromack_autogen/UVLADIE3JM/moc_ChromackControl.cpp \
