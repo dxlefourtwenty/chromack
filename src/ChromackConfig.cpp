@@ -121,7 +121,8 @@ QString defaultConfigContents()
         "material_css = \"~/.config/chromack/material.css\"\n"
         "state_file = \"${XDG_RUNTIME_DIR}/chromack/panel.state\"\n"
         "recent_colors_file = \"~/.cache/chromack/recent-colors.txt\"\n"
-        "active_color_file = \"~/.cache/chromack/active-color.txt\"\n");
+        "active_color_file = \"~/.cache/chromack/active-color.txt\"\n"
+        "palette_directory = \"~/.local/share/chromack/palettes\"\n");
 }
 
 QString defaultColorsContents()
@@ -289,6 +290,12 @@ QFrame#headerBar {
     border-radius: var(--header-radius);
 }
 
+QFrame#paletteSavePrompt {
+    background: var(--panel-bg);
+    border: var(--panel-border-width) solid var(--color-border);
+    border-radius: var(--content-radius);
+}
+
 QLabel#headerTitle {
     color: var(--text-main);
     font-size: var(--title-size);
@@ -301,6 +308,7 @@ QLabel#headerSubtitle {
 }
 
 QPushButton#closeButton,
+QPushButton#saveButton,
 QPushButton#eyedropperButton {
     min-height: var(--button-height);
     min-width: var(--button-height);
@@ -311,9 +319,10 @@ QPushButton#eyedropperButton {
     font-weight: 700;
 }
 
+QPushButton#saveButton,
 QPushButton#eyedropperButton {
     font-family: "Symbols Nerd Font Mono", var(--font-family);
-    font-size: 10.67px;
+    font-size: 13px;
     font-weight: 500;
 }
 
@@ -579,6 +588,19 @@ QFrame#paletteInputRow QPushButton#paletteGenerateButton:hover {
     border-color: var(--text-color);
 }
 
+QFrame#paletteSavePrompt QPushButton#paletteGenerateButton {
+    min-height: var(--input-height);
+    border-radius: var(--input-radius);
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 0 10px;
+}
+
+QFrame#paletteSavePrompt QPushButton#paletteGenerateButton:hover {
+    border-color: var(--text-color);
+}
+
 QPushButton#paletteSwatch {
     min-width: var(--preview-width);
     min-height: var(--preview-height);
@@ -781,6 +803,42 @@ QString ensurePaletteAndTabStyle(QString style)
 {
     appendIfMissing(
         &style,
+        QStringLiteral("QFrame#paletteSavePrompt"),
+        QStringLiteral(R"(
+QFrame#paletteSavePrompt {
+    background: var(--panel-bg);
+    border: var(--panel-border-width) solid var(--color-border);
+    border-radius: var(--content-radius);
+}
+)")
+    );
+
+    appendIfMissing(
+        &style,
+        QStringLiteral("QPushButton#saveButton"),
+        QStringLiteral(R"(
+QPushButton#saveButton {
+    min-height: var(--button-height);
+    min-width: var(--button-height);
+    border: var(--control-border-width) solid var(--control-border-color);
+    border-radius: var(--button-radius);
+    background: transparent;
+    color: var(--text-main);
+    font-family: "Symbols Nerd Font Mono", var(--font-family);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+QPushButton#saveButton:hover {
+    background: var(--color-surface-alt);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+)")
+    );
+
+    appendIfMissing(
+        &style,
         QStringLiteral("QTabWidget#panelTabs::pane"),
         QStringLiteral(R"(
 QTabWidget#panelTabs::pane {
@@ -914,6 +972,19 @@ QPushButton#paletteGenerateButton:hover {
 }
 
 QFrame#paletteInputRow QPushButton#paletteGenerateButton:hover {
+    border-color: var(--text-color);
+}
+
+QFrame#paletteSavePrompt QPushButton#paletteGenerateButton {
+    min-height: var(--input-height);
+    border-radius: var(--input-radius);
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 0 10px;
+}
+
+QFrame#paletteSavePrompt QPushButton#paletteGenerateButton:hover {
     border-color: var(--text-color);
 }
 )")
@@ -1162,6 +1233,8 @@ void loadConfig(const QString &path, ChromackConfig *config)
                 parseString(value, &config->paths.recentColorsFile);
             } else if (key == QStringLiteral("active_color_file")) {
                 parseString(value, &config->paths.activeColorFile);
+            } else if (key == QStringLiteral("palette_directory")) {
+                parseString(value, &config->paths.paletteDirectory);
             }
         }
     }

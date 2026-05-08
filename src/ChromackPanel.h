@@ -79,6 +79,9 @@ private:
     void copyHexValue();
     void copyRgbaValue();
     void copyTextValue(const QString &value);
+    void promptSavePalette();
+    void hideSavePalettePrompt();
+    void savePalette(const QString &name);
     void launchEyedropper();
     void pushRecentColor(const QColor &color, bool persist);
     void loadRecentColors();
@@ -109,6 +112,7 @@ private:
     QString stateFilePath() const;
     QString recentColorsFilePath() const;
     QString activeColorFilePath() const;
+    QString paletteDirectoryPath() const;
     QString expandPath(QString value) const;
     void writeStateFile(const QString &value);
 
@@ -122,8 +126,13 @@ private:
 
     QFrame *headerBar_ = nullptr;
     QHBoxLayout *headerLayout_ = nullptr;
+    QFrame *savePromptFrame_ = nullptr;
+    QLineEdit *savePaletteNameInput_ = nullptr;
+    QPushButton *savePromptCancelButton_ = nullptr;
+    QPushButton *savePromptSaveButton_ = nullptr;
     QLabel *titleLabel_ = nullptr;
     QLabel *subtitleLabel_ = nullptr;
+    QPushButton *saveButton_ = nullptr;
     QPushButton *eyedropperButton_ = nullptr;
     QPushButton *closeButton_ = nullptr;
 

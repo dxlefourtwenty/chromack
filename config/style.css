@@ -80,6 +80,12 @@ QFrame#headerBar {
     border-radius: var(--header-radius);
 }
 
+QFrame#paletteSavePrompt {
+    background: var(--panel-bg);
+    border: var(--panel-border-width) solid var(--color-border);
+    border-radius: var(--content-radius);
+}
+
 QLabel#headerTitle {
     color: var(--text-main);
     font-size: var(--title-size);
@@ -92,6 +98,7 @@ QLabel#headerSubtitle {
 }
 
 QPushButton#closeButton,
+QPushButton#saveButton,
 QPushButton#eyedropperButton {
     min-height: var(--button-height);
     min-width: var(--button-height);
@@ -102,12 +109,14 @@ QPushButton#eyedropperButton {
     font-weight: 700;
 }
 
+QPushButton#saveButton,
 QPushButton#eyedropperButton {
     font-family: "Symbols Nerd Font Mono", var(--font-family);
-    font-size: 10.67px;
+    font-size: 13px;
     font-weight: 500;
 }
 
+QPushButton#saveButton:hover,
 QPushButton#eyedropperButton:hover {
     background: var(--color-surface-alt);
     border-color: var(--color-primary);
@@ -362,6 +371,19 @@ QPushButton#inlineCopyButton {
 
 QPushButton#inlineCopyButton:hover,
 QPushButton#paletteGenerateButton:hover {
+    border-color: var(--text-color);
+}
+
+QFrame#paletteSavePrompt QPushButton#paletteGenerateButton {
+    min-height: var(--input-height);
+    border-radius: var(--input-radius);
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 0 10px;
+}
+
+QFrame#paletteSavePrompt QPushButton#paletteGenerateButton:hover {
     border-color: var(--text-color);
 }
 

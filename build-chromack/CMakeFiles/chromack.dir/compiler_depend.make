@@ -2587,6 +2587,7 @@ CMakeFiles/chromack.dir/src/ChromackPanel.cpp.o: /home/dxle/builds/chromack/src/
   /usr/include/qt6/QtCore/QPropertyAnimation \
   /usr/include/qt6/QtCore/QRect \
   /usr/include/qt6/QtCore/QRegularExpression \
+  /usr/include/qt6/QtCore/QSet \
   /usr/include/qt6/QtCore/QSize \
   /usr/include/qt6/QtCore/QSizeF \
   /usr/include/qt6/QtCore/QStandardPaths \

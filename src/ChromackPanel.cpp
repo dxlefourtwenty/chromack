@@ -22,6 +22,7 @@
 #include <QRegularExpression>
 #include <QScreen>
 #include <QScrollArea>
+#include <QSet>
 #include <QSlider>
 #include <QStandardPaths>
 #include <QStyle>
@@ -634,6 +635,24 @@ QString toCssColor(const QColor &color)
         .arg(alpha);
 }
 
+QString toPaletteFileColor(const QColor &color)
+{
+    if (!color.isValid()) {
+        return QStringLiteral("#000000");
+    }
+
+    QString value = QStringLiteral("#%1%2%3")
+        .arg(color.red(), 2, 16, QLatin1Char('0'))
+        .arg(color.green(), 2, 16, QLatin1Char('0'))
+        .arg(color.blue(), 2, 16, QLatin1Char('0'));
+
+    if (color.alpha() < 255) {
+        value += QStringLiteral("%1").arg(color.alpha(), 2, 16, QLatin1Char('0'));
+    }
+
+    return value.toLower();
+}
+
 QString toRgbaColor(const QColor &color)
 {
     if (!color.isValid()) {
@@ -870,6 +889,11 @@ QString copyButtonGlyph()
     return QString::fromUtf8(u8"󰆏");
 }
 
+QString saveButtonGlyph()
+{
+    return QString::fromUtf8(u8"");
+}
+
 void configureInlineCopyButton(QPushButton *button)
 {
     if (!button) {
@@ -881,6 +905,63 @@ void configureInlineCopyButton(QPushButton *button)
     glyphFont.setBold(true);
     button->setFont(glyphFont);
     button->setText(copyButtonGlyph());
+}
+
+void configureHeaderGlyphButton(QPushButton *button, const QString &glyph)
+{
+    if (!button) {
+        return;
+    }
+
+    QFont glyphFont = button->font();
+    glyphFont.setFamily(QStringLiteral("Symbols Nerd Font Mono"));
+    glyphFont.setPixelSize(13);
+    glyphFont.setBold(false);
+    button->setFont(glyphFont);
+    button->setText(glyph);
+}
+
+QString sanitizePaletteFileBase(QString name)
+{
+    name = name.trimmed().toLower();
+    name.replace(QRegularExpression(QStringLiteral(R"([^a-z0-9._-]+)")), QStringLiteral("-"));
+    name.replace(QRegularExpression(QStringLiteral(R"(-{2,})")), QStringLiteral("-"));
+    name.remove(QRegularExpression(QStringLiteral(R"(^[.-]+|[.-]+$)")));
+
+    if (name.isEmpty()) {
+        return QStringLiteral("palette");
+    }
+
+    return name;
+}
+
+QString tomlQuoted(QString value)
+{
+    value.replace(QLatin1Char('\\'), QStringLiteral("\\\\"));
+    value.replace(QLatin1Char('"'), QStringLiteral("\\\""));
+    value.replace(QLatin1Char('\n'), QStringLiteral("\\n"));
+    value.replace(QLatin1Char('\r'), QStringLiteral("\\r"));
+    return QStringLiteral("\"%1\"").arg(value);
+}
+
+QString paletteColorKey(const QString &label)
+{
+    QString key = label.trimmed().toLower();
+    key.replace(QRegularExpression(QStringLiteral(R"([^a-z0-9]+)")), QStringLiteral("_"));
+    key.remove(QRegularExpression(QStringLiteral(R"(^_+|_+$)")));
+    return key.isEmpty() ? QStringLiteral("color") : key;
+}
+
+QString displayPathWithTilde(const QString &path)
+{
+    const QString homePath = QDir::homePath();
+    if (path == homePath) {
+        return QStringLiteral("~");
+    }
+    if (path.startsWith(homePath + QLatin1Char('/'))) {
+        return QStringLiteral("~") + path.mid(homePath.size());
+    }
+    return path;
 }
 
 void notifyCopiedColor(const QString &value, const QColor &color)
@@ -1030,6 +1111,31 @@ void ChromackPanel::buildUi()
     panelLayout_->setContentsMargins(14, 20, 14, 14);
     panelLayout_->setSpacing(10);
 
+    savePromptFrame_ = new QFrame(panelRoot_);
+    savePromptFrame_->setObjectName(QStringLiteral("paletteSavePrompt"));
+    auto *savePromptLayout = new QHBoxLayout(savePromptFrame_);
+    savePromptLayout->setContentsMargins(10, 8, 10, 8);
+    savePromptLayout->setSpacing(8);
+
+    auto *savePromptLabel = new QLabel(QStringLiteral("Palette name"), savePromptFrame_);
+    savePromptLabel->setObjectName(QStringLiteral("sectionLabel"));
+
+    savePaletteNameInput_ = new QLineEdit(savePromptFrame_);
+    savePaletteNameInput_->setObjectName(QStringLiteral("paletteInput"));
+    savePaletteNameInput_->setPlaceholderText(QStringLiteral("palette-name"));
+
+    savePromptCancelButton_ = new QPushButton(QStringLiteral("Cancel"), savePromptFrame_);
+    savePromptCancelButton_->setObjectName(QStringLiteral("paletteGenerateButton"));
+
+    savePromptSaveButton_ = new QPushButton(QStringLiteral("Save"), savePromptFrame_);
+    savePromptSaveButton_->setObjectName(QStringLiteral("paletteGenerateButton"));
+
+    savePromptLayout->addWidget(savePromptLabel);
+    savePromptLayout->addWidget(savePaletteNameInput_, 1);
+    savePromptLayout->addWidget(savePromptCancelButton_);
+    savePromptLayout->addWidget(savePromptSaveButton_);
+    savePromptFrame_->setVisible(false);
+
     headerBar_ = new QFrame(panelRoot_);
     headerBar_->setObjectName(QStringLiteral("headerBar"));
     headerLayout_ = new QHBoxLayout(headerBar_);
@@ -1055,17 +1161,27 @@ void ChromackPanel::buildUi()
     closeButton_->setObjectName(QStringLiteral("closeButton"));
     closeButton_->setMouseTracking(true);
     closeButton_->setAttribute(Qt::WA_Hover, true);
+
+    saveButton_ = new QPushButton(headerBar_);
+    saveButton_->setObjectName(QStringLiteral("saveButton"));
+    saveButton_->setMouseTracking(true);
+    saveButton_->setAttribute(Qt::WA_Hover, true);
+    configureHeaderGlyphButton(saveButton_, saveButtonGlyph());
+    saveButton_->setToolTip(QStringLiteral("Save palette"));
+
     eyedropperButton_ = new QPushButton(headerBar_);
     eyedropperButton_->setObjectName(QStringLiteral("eyedropperButton"));
     eyedropperButton_->setMouseTracking(true);
     eyedropperButton_->setAttribute(Qt::WA_Hover, true);
-    eyedropperButton_->setText(QString::fromUtf8(u8""));
+    configureHeaderGlyphButton(eyedropperButton_, QString::fromUtf8(u8""));
     eyedropperButton_->setToolTip(QStringLiteral("Launch color picker"));
 
     headerLayout_->addWidget(titleWrap, 1);
+    headerLayout_->addWidget(saveButton_);
     headerLayout_->addWidget(eyedropperButton_);
     headerLayout_->addWidget(closeButton_);
 
+    panelLayout_->addWidget(savePromptFrame_);
     panelLayout_->addWidget(headerBar_);
     panelLayout_->addSpacing(4);
 
@@ -1306,6 +1422,16 @@ void ChromackPanel::buildUi()
         writeColors();
         reloadConfiguration();
         closePanel();
+    });
+    connect(saveButton_, &QPushButton::clicked, this, &ChromackPanel::promptSavePalette);
+    connect(savePromptCancelButton_, &QPushButton::clicked, this, &ChromackPanel::hideSavePalettePrompt);
+    connect(savePromptSaveButton_, &QPushButton::clicked, this, [this]() {
+        savePalette(savePaletteNameInput_ ? savePaletteNameInput_->text() : QString());
+        hideSavePalettePrompt();
+    });
+    connect(savePaletteNameInput_, &QLineEdit::returnPressed, this, [this]() {
+        savePalette(savePaletteNameInput_ ? savePaletteNameInput_->text() : QString());
+        hideSavePalettePrompt();
     });
     connect(eyedropperButton_, &QPushButton::clicked, this, &ChromackPanel::launchEyedropper);
     connect(copyHexButton_, &QPushButton::clicked, this, &ChromackPanel::copyHexValue);
@@ -2191,6 +2317,100 @@ void ChromackPanel::copyTextValue(const QString &value)
     notifyCopiedColor(value, copiedColor);
 }
 
+void ChromackPanel::promptSavePalette()
+{
+    if (paletteRows_.isEmpty() || !savePromptFrame_ || !savePaletteNameInput_) {
+        return;
+    }
+
+    if (savePromptFrame_->isVisible()) {
+        hideSavePalettePrompt();
+        return;
+    }
+
+    savePaletteNameInput_->setText(QStringLiteral("palette"));
+    savePaletteNameInput_->selectAll();
+    savePromptFrame_->setVisible(true);
+    savePaletteNameInput_->setFocus(Qt::ShortcutFocusReason);
+}
+
+void ChromackPanel::hideSavePalettePrompt()
+{
+    if (savePromptFrame_) {
+        savePromptFrame_->setVisible(false);
+    }
+}
+
+void ChromackPanel::savePalette(const QString &name)
+{
+    const QString displayName = name.trimmed().isEmpty()
+        ? QStringLiteral("Palette")
+        : name.trimmed();
+    const QString fileBase = sanitizePaletteFileBase(displayName);
+    const QString directoryPath = paletteDirectoryPath();
+
+    QDir directory(directoryPath);
+    if (!directory.exists() && !QDir().mkpath(directoryPath)) {
+        if (paletteStatusLabel_) {
+            paletteStatusLabel_->setText(QStringLiteral("Could not create palette directory."));
+        }
+        return;
+    }
+
+    QString fileName = fileBase + QStringLiteral(".toml");
+    QString path = directory.filePath(fileName);
+    int suffix = 2;
+    while (QFileInfo::exists(path)) {
+        fileName = QStringLiteral("%1-%2.toml").arg(fileBase).arg(suffix);
+        path = directory.filePath(fileName);
+        ++suffix;
+    }
+
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        if (paletteStatusLabel_) {
+            paletteStatusLabel_->setText(QStringLiteral("Could not save palette."));
+        }
+        return;
+    }
+
+    QTextStream stream(&file);
+    stream << "[palette]\n";
+    stream << "name = " << tomlQuoted(displayName) << '\n';
+    stream << "base = " << tomlQuoted(toPaletteFileColor(activeColor())) << "\n\n";
+    stream << "[colors]\n";
+
+    QSet<QString> usedKeys;
+    for (const PaletteRow &row : paletteRows_) {
+        if (!row.nameLabel || !row.valueInput) {
+            continue;
+        }
+        const QColor color = parseColorValue(row.valueInput->text());
+        if (!color.isValid()) {
+            continue;
+        }
+
+        QString key = paletteColorKey(row.nameLabel->text());
+        int suffixIndex = 2;
+        while (usedKeys.contains(key)) {
+            key = QStringLiteral("%1_%2").arg(key).arg(suffixIndex);
+            ++suffixIndex;
+        }
+        usedKeys.insert(key);
+        stream << key << " = " << tomlQuoted(toPaletteFileColor(color)) << '\n';
+    }
+
+    if (paletteStatusLabel_) {
+        paletteStatusLabel_->setText(QStringLiteral("Saved palette to %1").arg(path));
+    }
+    QProcess::startDetached(QStringLiteral("/usr/bin/notify-send"),
+                            QStringList()
+                                << QStringLiteral("-t")
+                                << QStringLiteral("5000")
+                                << QStringLiteral("Chromack")
+                                << QStringLiteral("Palette saved to %1").arg(displayPathWithTilde(path)));
+}
+
 void ChromackPanel::launchEyedropper()
 {
     const QString command = config_.panel.eyedropperCommand.trimmed();
@@ -2603,6 +2823,12 @@ void ChromackPanel::resizeEvent(QResizeEvent *event)
 
 void ChromackPanel::keyPressEvent(QKeyEvent *event)
 {
+    if (event->key() == Qt::Key_Escape && savePromptFrame_ && savePromptFrame_->isVisible()) {
+        hideSavePalettePrompt();
+        event->accept();
+        return;
+    }
+
     if (event->key() == Qt::Key_Escape && config_.panel.closeOnEscape) {
         closePanel();
         event->accept();
@@ -3023,6 +3249,11 @@ QString ChromackPanel::recentColorsFilePath() const
 QString ChromackPanel::activeColorFilePath() const
 {
     return expandPath(config_.paths.activeColorFile);
+}
+
+QString ChromackPanel::paletteDirectoryPath() const
+{
+    return expandPath(config_.paths.paletteDirectory);
 }
 
 QString ChromackPanel::expandPath(QString value) const
